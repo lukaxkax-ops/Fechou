@@ -353,17 +353,27 @@ async function checkAuth() {
     document.getElementById("user-display-name").textContent = displayName;
     logoutBtn.style.display = "inline-flex";
     
+    // Controle de visibilidade das abas de contato
+    const navContactConfig = document.getElementById("nav-contact-config");
+    const navUserContact = document.getElementById("nav-user-contact");
+
     if (currentUser === "mestre") {
       // Exibe Painel Mestre
       mainGrid.style.display = "none";
       auditBanner.style.display = "none";
       masterGrid.style.display = "block";
+      // Mestre vê "Configurações de Contato", NÃO vê "Contato"
+      if (navContactConfig) navContactConfig.style.display = "";
+      if (navUserContact) navUserContact.style.display = "none";
       loadMasterPanel();
     } else {
       // Exibe Interface Operador
       mainGrid.style.display = "grid";
       masterGrid.style.display = "none";
       auditBanner.style.display = isAuditMode ? "flex" : "none";
+      // Operador vê "Contato", NÃO vê "Configurações de Contato"
+      if (navContactConfig) navContactConfig.style.display = "none";
+      if (navUserContact) navUserContact.style.display = "";
       initApp();
     }
   } else {
