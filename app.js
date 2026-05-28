@@ -1299,6 +1299,7 @@ function handleExpensePhoto(input, rowId) {
 }
 
 // Upload assíncrono de Base64 para o ImgBB
+// Upload assíncrono de Base64 para o ImgBB
 async function uploadImageToImgBB(base64Data, rowId) {
   const row = document.getElementById(rowId);
   if (!row) return;
@@ -1313,12 +1314,25 @@ async function uploadImageToImgBB(base64Data, rowId) {
   }
 
   try {
+    let apiKey = "";
+    if (masterContactSettings && masterContactSettings.imgbbApiKey) {
+      const trimmedKey = masterContactSettings.imgbbApiKey.trim();
+      // Valida se é um hexadecimal de 32 caracteres padrão do ImgBB (evita usar senhas mestres pessoais do usuário)
+      if (/^[a-fA-F0-9]{32}$/.test(trimmedKey)) {
+        apiKey = trimmedKey;
+      }
+    }
+
+    if (!apiKey) {
+      console.warn("Nenhuma chave API do ImgBB válida de 32 caracteres foi configurada pelo mestre. O anexo será mantido localmente.");
+      throw new Error("Chave API ImgBB ausente ou inválida. Anexo de despesa salvo localmente.");
+    }
+
     const cleanBase64 = base64Data.split(",")[1] || base64Data;
     
     const formData = new FormData();
     formData.append("image", cleanBase64);
 
-    const apiKey = "32b1a134bf3eb93d254ee87fb4936b8e";
     const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
       method: "POST",
       body: formData
@@ -1715,7 +1729,7 @@ async function saveClosing(event) {
   if (confirmWhatsApp) {
     const waText = getFormattedWhatsAppText(newClosing);
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
-    window.open(waUrl, '_blank');
+    shareOnWhatsApp(waUrl);
   }
   
   // Restaura o estado do botão
@@ -2532,6 +2546,16 @@ function getFormattedWhatsAppText(day) {
   return text;
 }
 
+// Auxiliar para compartilhamento de WhatsApp sem bloqueio de pop-up no mobile
+function shareOnWhatsApp(waUrl) {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.location.href = waUrl;
+  } else {
+    window.open(waUrl, '_blank');
+  }
+}
+
 // --- EXPORTAR RELATÓRIO FORMATADO PARA WHATSAPP ---
 function shareWhatsApp() {
   const day = closingsData.find(c => c.date === currentViewDate && (c.shift || "dia") === currentViewShift);
@@ -2542,7 +2566,7 @@ function shareWhatsApp() {
 
   const text = getFormattedWhatsAppText(day);
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 // Enviar fechamento antigo diretamente do histórico via WhatsApp
@@ -2555,7 +2579,7 @@ function shareWhatsAppDirect(dateStr, shiftStr = "dia") {
 
   const text = getFormattedWhatsAppText(day);
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 // --- SISTEMA DE ALTERNÂNCIA DE TEMA (CLARO/ESCURO) ---
@@ -3059,7 +3083,7 @@ function sendRecoveryWhatsApp(username, password, adminPassword) {
     `Você já pode fazer login utilizando seu telefone e a senha de acesso acima. Guarde sua senha administrativa com segurança!`;
   
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 // Arquiva/exclui a solicitação resolvida da nuvem no Upstash
@@ -3412,7 +3436,7 @@ async function saveBankClosing(event) {
   if (confirmWhatsApp) {
     const waText = getFormattedBankWhatsAppText(newBankClosing);
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
-    window.open(waUrl, '_blank');
+    shareOnWhatsApp(waUrl);
   }
 
   saveBtn.disabled = false;
@@ -3612,7 +3636,7 @@ function shareBankWhatsApp() {
   if (!day) return;
   const text = getFormattedBankWhatsAppText(day);
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 function shareBankWhatsAppDirect(dateStr, shiftStr = "dia") {
@@ -3620,7 +3644,7 @@ function shareBankWhatsAppDirect(dateStr, shiftStr = "dia") {
   if (!day) return;
   const text = getFormattedBankWhatsAppText(day);
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 // Modal de Detalhes de Fechamento Bancário
@@ -4350,7 +4374,7 @@ function shareMonthlyReportWhatsApp() {
   const confirmWhatsApp = confirm("Deseja enviar o fechamento periódico consolidado via WhatsApp?");
   if (confirmWhatsApp) {
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(waUrl, '_blank');
+    shareOnWhatsApp(waUrl);
   }
 }
 
@@ -4423,7 +4447,7 @@ function shareEmployeeValesWhatsAppDirect(employeeKey) {
 
   const text = getFormattedEmployeeValesText(emp, startInput, endInput);
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 function shareEmployeeValesWhatsApp() {
@@ -4598,7 +4622,7 @@ function sendPixReceiptWhatsApp() {
     `Estou enviando o comprovante do Pix em anexo. Aguardo a liberação da licença do meu app!`;
 
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-  window.open(waUrl, '_blank');
+  shareOnWhatsApp(waUrl);
 }
 
 // Gerenciamento de Licenças e Acesso via Painel do Administrador Mestre
