@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecionando... | Fechou!</title>
+  <meta name="robots" content="noindex">
+  <script>
+    // Técnica padrão de redirecionamento de SPA/PWA para GitHub Pages
+    // Quando o GitHub Pages retorna 404 (ex: ao abrir o PWA pelo ícone da gaveta de apps),
+    // este arquivo redireciona o usuário de volta para a raiz do app em /Fechou/
+    (function() {
+      var origin = window.location.origin;
+      var path = window.location.pathname;
+      var search = window.location.search;
+      var hash = window.location.hash;
+
+      // Sempre redireciona para a raiz do app
+      var target = origin + '/Fechou/' + search + hash;
+      window.location.replace(target);
+    })();
+  </script>
+</head>
+<body>
+  <p style="font-family: sans-serif; text-align: center; margin-top: 60px; color: #666;">
+    Redirecionando para o Fechou!...
+  </p>
+</body>
+</html>

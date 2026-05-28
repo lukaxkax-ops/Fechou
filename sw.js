@@ -1,19 +1,19 @@
 /*
   Service Worker do Fechou! - PWA Cache & Instalabilidade
-  Criado com amor para permitir a instalação nativa rápida.
+  Cache v31 - Compatibilidade total com GitHub Pages /Fechou/
 */
 
-const CACHE_NAME = "fechou-cache-v30";
-const BASE = "/Fechou/";
+const CACHE_NAME = "fechou-cache-v31";
 const ASSETS = [
-  BASE,
-  BASE + "index.html",
-  BASE + "style.css",
-  BASE + "app.js",
-  BASE + "manifest.json",
-  BASE + "icon-512.png",
-  BASE + "pix-qr.png",
-  BASE + "sw.js"
+  "/Fechou/",
+  "/Fechou/index.html",
+  "/Fechou/style.css",
+  "/Fechou/app.js",
+  "/Fechou/manifest.json",
+  "/Fechou/icon-512.png",
+  "/Fechou/pix-qr.png",
+  "/Fechou/sw.js",
+  "/Fechou/404.html"
 ];
 
 // Instalação: Cacheia todos os arquivos estáticos
@@ -26,7 +26,7 @@ self.addEventListener("install", (e) => {
   );
 });
 
-// Ativação: Limpa caches antigos
+// Ativação: Limpa caches antigos e assume controle imediato
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -42,22 +42,20 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// Interceptador de Requisições: Network-First (com fallback de Cache)
+// Network-First: tenta buscar da rede, cai no cache se offline
 self.addEventListener("fetch", (e) => {
-  // Ignora requisições de APIs ou origens externas (ex: Upstash API, Google Fonts, ImgBB)
-  if (!e.request.url.startsWith(self.location.origin)) {
-    return;
-  }
+  const url = e.request.url;
 
-  // Ignora requisições que não estão no escopo do app
-  if (!e.request.url.includes("/Fechou/") && e.request.url !== self.location.origin + "/Fechou/") {
-    return;
-  }
+  // Ignora origens externas (APIs, CDNs, ImgBB, Upstash, etc.)
+  if (!url.startsWith(self.location.origin)) return;
+
+  // Ignora requisições de método não-GET
+  if (e.request.method !== "GET") return;
 
   e.respondWith(
     fetch(e.request)
       .then((response) => {
-        // Se a resposta for válida e bem-sucedida, atualiza o cache local
+        // Cache somente respostas válidas do próprio origin
         if (response && response.status === 200 && response.type === "basic") {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -67,10 +65,9 @@ self.addEventListener("fetch", (e) => {
         return response;
       })
       .catch(() => {
-        // Em caso de offline ou falha de rede, busca no cache local
+        // Offline: busca no cache. Se não achar, serve a página principal
         return caches.match(e.request).then((cached) => {
-          // Se não encontrar o recurso específico, retorna a página principal (SPA fallback)
-          return cached || caches.match(BASE + "index.html");
+          return cached || caches.match("/Fechou/index.html");
         });
       })
   );
