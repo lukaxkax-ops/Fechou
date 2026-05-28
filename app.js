@@ -1134,9 +1134,9 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
   row.className = "expense-row";
   row.id = rowId;
 
-  // Alinha perfeitamente com o construtor de despesas gerais usando as mesmas 5 colunas do grid
+  // Usa 2 colunas para o Nome, 1 para o Valor e 1 para Excluir, totalizando as 4 colunas do grid CSS
   row.innerHTML = `
-    <div class="input-container">
+    <div class="input-container" style="grid-column: span 2;">
       <label style="font-size: 11px;">Nome do Funcionário</label>
       <input type="text" class="form-control vale-desc" placeholder="Ex: João (Adiantamento)" value="${employeeName}" required>
     </div>
@@ -1147,10 +1147,7 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
         <input type="number" step="0.01" min="0.01" class="form-control vale-val form-control-prefix" style="padding-left: 28px;" placeholder="0,00" value="${value}" oninput="updateLiveDashboard()" required>
       </div>
     </div>
-    <div class="input-container desktop-only-spacer" style="grid-column: span 2;">
-      <!-- Espaçador para alinhamento estético perfeito no desktop -->
-    </div>
-    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale" style="margin-bottom: 0; align-self: flex-end; height: 42px;">
+    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale">
       <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
     </button>
   `;
@@ -1173,7 +1170,7 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
 
   // Categorias: Carne, Alimentos em Geral, Limpeza, Outros
   row.innerHTML = `
-    <div class="input-container" style="grid-column: span 2;">
+    <div class="input-container">
       <label style="font-size: 11px;">Descrição da Despesa</label>
       <input type="text" class="form-control expense-desc" placeholder="Ex: Pão de Hambúrguer" value="${description}" required>
     </div>
@@ -1193,15 +1190,18 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
         <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
       </select>
     </div>
-    <div class="input-container" style="display: flex; align-items: flex-end; justify-content: center; height: 100%;">
-      <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Foto da Nota" style="width: 42px; height: 42px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth); margin-bottom: 0;">
+    <div class="expense-actions-stack" style="display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 42px; margin-bottom: 0;">
+      <!-- Botão de Foto -->
+      <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Foto da Nota" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
         <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
       </button>
       <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
+      
+      <!-- Botão de Excluir -->
+      <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+      </button>
     </div>
-    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa" style="margin-bottom: 0; align-self: flex-end; height: 42px;">
-      <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-    </button>
   `;
 
   container.appendChild(row);

@@ -568,7 +568,7 @@ header {
 
 .expense-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 90px 110px 42px 42px;
+  grid-template-columns: 1fr 120px 130px 42px;
   gap: 8px;
   align-items: flex-end;
   background: rgba(255, 255, 255, 0.02);
@@ -1186,18 +1186,14 @@ header {
     grid-column: span 1 !important; /* Dropdown de Categoria */
   }
 
-  .expense-row .input-container:nth-child(4) {
-    grid-column: span 2 !important; /* Botão de foto */
+  .expense-row .expense-actions-stack {
+    grid-column: span 1 !important;
+    align-self: flex-end !important;
   }
   
   .expense-row button, .expense-row .btn-icon-danger {
     grid-column: span 1 !important;
     align-self: flex-end !important;
-    height: 42px !important;
-  }
-
-  .expense-row .btn-expense-photo {
-    width: 100% !important;
   }
 
   /* Formatação específica para o construtor de Vales (Nome, Valor, Trash) */
