@@ -1157,13 +1157,16 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
   disableOperatorInputs(isLicenseExpired);
 }
 
-function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container") {
+function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "") {
   const container = document.getElementById(containerId);
   const rowId = `expense-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const row = document.createElement("div");
   row.className = "expense-row";
   row.id = rowId;
+  if (photo) {
+    row.dataset.photo = photo;
+  }
 
   // Categorias: Carne, Alimentos em Geral, Limpeza, Outros
   row.innerHTML = `
@@ -1187,12 +1190,21 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
         <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
       </select>
     </div>
-    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa">
+    <div class="input-container" style="display: flex; align-items: flex-end; justify-content: center; height: 100%;">
+      <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Foto da Nota" style="width: 42px; height: 42px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth); margin-bottom: 0;">
+        <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+      </button>
+      <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
+    </div>
+    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa" style="margin-bottom: 0; align-self: flex-end; height: 42px;">
       <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
     </button>
   `;
 
   container.appendChild(row);
+  if (photo) {
+    updateExpenseRowPhotoUI(rowId, photo);
+  }
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
 }
@@ -1206,6 +1218,148 @@ function addExpenseRow(description = "", value = "", category = "alimentos", con
   } else {
     addGeneralExpenseRow(description, value, category, containerId);
   }
+}
+
+// Compressão, Upload e Preview de Imagens de Despesas
+function triggerExpensePhotoUpload(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  if (row.dataset.photo) {
+    previewExpensePhoto(rowId);
+  } else {
+    const fileInput = document.getElementById(`file-${rowId}`);
+    if (fileInput) fileInput.click();
+  }
+}
+
+function handleExpensePhoto(input, rowId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // Compactação em Canvas no client-side para evitar estourar o limite da nuvem
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+      const MAX_SIZE = 800; // Limite de 800px para manter altíssima nitidez e peso baixíssimo (30KB)
+
+      if (width > height) {
+        if (width > MAX_SIZE) {
+          height = Math.round((height * MAX_SIZE) / width);
+          width = MAX_SIZE;
+        }
+      } else {
+        if (height > MAX_SIZE) {
+          width = Math.round((width * MAX_SIZE) / height);
+          height = MAX_SIZE;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Converte para jpeg compactado (qualidade 0.7)
+      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.dataset.photo = compressedDataUrl;
+        updateExpenseRowPhotoUI(rowId, compressedDataUrl);
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateExpenseRowPhotoUI(rowId, dataUrl) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  const btn = row.querySelector(".btn-expense-photo");
+  if (!btn) return;
+
+  if (dataUrl) {
+    btn.innerHTML = `<img src="${dataUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">`;
+    btn.title = "Visualizar / Alterar Foto da Nota";
+    row.dataset.photo = dataUrl;
+  } else {
+    btn.innerHTML = `<i data-lucide="camera" style="width: 16px; height: 16px;"></i>`;
+    btn.title = "Anexar Foto da Nota";
+    row.removeAttribute("data-photo");
+    lucide.createIcons();
+  }
+}
+
+function previewExpensePhoto(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row || !row.dataset.photo) return;
+
+  let previewModal = document.getElementById("modal-photo-preview");
+  if (!previewModal) {
+    previewModal = document.createElement("div");
+    previewModal.id = "modal-photo-preview";
+    previewModal.className = "modal-overlay";
+    previewModal.style.zIndex = "999999";
+    previewModal.innerHTML = `
+      <div class="modal-box" style="max-width: 600px; padding: 20px;">
+        <div class="modal-header">
+          <h3>Comprovante da Despesa</h3>
+          <span class="modal-close" onclick="closeModal('modal-photo-preview')">&times;</span>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px 0;">
+          <img id="photo-preview-img" style="max-width: 100%; max-height: 70vh; border-radius: var(--radius-md); box-shadow: var(--shadow-premium);">
+          <div style="display: flex; gap: 8px; width: 100%;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-photo-preview')" style="flex: 1;">Fechar</button>
+            <button class="btn btn-danger" id="btn-delete-photo-preview" style="flex: 1;">Remover Foto</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(previewModal);
+  }
+
+  const img = previewModal.querySelector("#photo-preview-img");
+  img.src = row.dataset.photo;
+
+  const deleteBtn = previewModal.querySelector("#btn-delete-photo-preview");
+  deleteBtn.onclick = function() {
+    updateExpenseRowPhotoUI(rowId, "");
+    closeModal("modal-photo-preview");
+  };
+
+  openModal("modal-photo-preview");
+}
+
+function previewDirectPhoto(dataUrl) {
+  let previewModal = document.getElementById("modal-photo-direct-preview");
+  if (!previewModal) {
+    previewModal = document.createElement("div");
+    previewModal.id = "modal-photo-direct-preview";
+    previewModal.className = "modal-overlay";
+    previewModal.style.zIndex = "999999";
+    previewModal.innerHTML = `
+      <div class="modal-box" style="max-width: 600px; padding: 20px;">
+        <div class="modal-header">
+          <h3>Comprovante da Despesa</h3>
+          <span class="modal-close" onclick="closeModal('modal-photo-direct-preview')">&times;</span>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px 0;">
+          <img id="photo-direct-preview-img" style="max-width: 100%; max-height: 70vh; border-radius: var(--radius-md); box-shadow: var(--shadow-premium);">
+          <button class="btn btn-secondary" onclick="closeModal('modal-photo-direct-preview')" style="width: 100%;">Fechar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(previewModal);
+  }
+  previewModal.querySelector("#photo-direct-preview-img").src = dataUrl;
+  openModal("modal-photo-direct-preview");
 }
 
 function removeExpenseRow(rowId) {
@@ -1437,11 +1591,12 @@ async function saveClosing(event) {
     const val = parseFloat(row.querySelector(".expense-val").value) || 0;
     const cat = row.querySelector(".expense-cat").value;
 
-  if (desc && val > 0) {
+    if (desc && val > 0) {
       expenses.push({
         description: desc,
         value: val,
-        category: cat
+        category: cat,
+        photo: row.dataset.photo || ""
       });
     }
   });
@@ -1650,10 +1805,21 @@ function viewDetails(dateStr, shiftStr = "dia") {
   if (!revenuesHtml) revenuesHtml = `<li style="font-style: italic; color: var(--text-muted); font-size:13px">Nenhuma receita registrada</li>`;
 
   let expensesHtml = "";
-  day.expenses.forEach(e => {
+  day.expenses.forEach((e, idx) => {
+    let photoIconHtml = "";
+    if (e.photo) {
+      photoIconHtml = `
+        <button type="button" class="btn btn-secondary btn-xs" onclick="previewDirectPhoto('${e.photo.replace(/'/g, "\\'")}')" style="height: 24px; padding: 0 8px; margin-left: 6px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; border-color: var(--border-glass);" title="Visualizar Nota Fiscal">
+          <i data-lucide="image" style="width: 12px; height: 12px; color: var(--primary);"></i> Ver Nota
+        </button>
+      `;
+    }
     expensesHtml += `
-      <li class="detail-item">
-        <span>${e.description} <small style="color:var(--text-muted)">(${EXPENSE_CATEGORIES[e.category] || e.category})</small>:</span>
+      <li class="detail-item" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+          <span>${e.description} <small style="color:var(--text-muted)">(${EXPENSE_CATEGORIES[e.category] || e.category})</small></span>
+          ${photoIconHtml}
+        </span>
         <span class="text-expense">${formatCurrency(e.value)}</span>
       </li>
     `;
@@ -1878,7 +2044,7 @@ async function editClosing(dateStr, shiftStr = "dia") {
         addValeRow(e.description, e.value, "edit-vales-list-container");
         hasVales = true;
       } else {
-        addGeneralExpenseRow(e.description, e.value, e.category, "edit-expense-list-container");
+        addGeneralExpenseRow(e.description, e.value, e.category, "edit-expense-list-container", e.photo || "");
         hasExpenses = true;
       }
     });
@@ -1964,7 +2130,8 @@ async function saveEditClosing(event) {
       expenses.push({
         description: desc,
         value: val,
-        category: cat
+        category: cat,
+        photo: row.dataset.photo || ""
       });
     }
   });

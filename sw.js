@@ -3,7 +3,7 @@
   Criado com amor para permitir a instalação nativa rápida.
 */
 
-const CACHE_NAME = "fechou-cache-v14";
+const CACHE_NAME = "fechou-cache-v15";
 const ASSETS = [
   "./",
   "./index.html",
