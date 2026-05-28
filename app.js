@@ -1784,6 +1784,8 @@ function formatDate(dateStr) {
 function clearFilters() {
   document.getElementById("filter-start-date").value = "";
   document.getElementById("filter-end-date").value = "";
+  const shiftFilter = document.getElementById("filter-shift");
+  if (shiftFilter) shiftFilter.value = "all";
   document.getElementById("filter-search").value = "";
   loadHistoryTable();
 }
@@ -1791,6 +1793,7 @@ function clearFilters() {
 function loadHistoryTable() {
   const startDate = document.getElementById("filter-start-date").value;
   const endDate = document.getElementById("filter-end-date").value;
+  const shiftFilter = document.getElementById("filter-shift") ? document.getElementById("filter-shift").value : "all";
   const search = document.getElementById("filter-search").value.toLowerCase();
 
   const filtered = closingsData.filter(day => {
@@ -1798,6 +1801,8 @@ function loadHistoryTable() {
     if (startDate && day.date < startDate) return false;
     // Filtro de data final
     if (endDate && day.date > endDate) return false;
+    // Filtro de turno
+    if (shiftFilter && shiftFilter !== "all" && (day.shift || "dia") !== shiftFilter) return false;
     // Filtro de busca de texto nas observações e despesas
     if (search) {
       const matchNotes = day.notes.toLowerCase().includes(search);

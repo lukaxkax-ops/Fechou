@@ -468,6 +468,14 @@
                   <label for="filter-end-date">Até:</label>
                   <input type="date" id="filter-end-date" class="form-control" onchange="loadHistoryTable()">
                 </div>
+                <div class="input-container" style="min-width: 120px;">
+                  <label for="filter-shift">Turno:</label>
+                  <select id="filter-shift" class="form-control" onchange="loadHistoryTable()">
+                    <option value="all">☀️🌙 Todos</option>
+                    <option value="dia">☀️ Dia</option>
+                    <option value="noite">🌙 Noite</option>
+                  </select>
+                </div>
                 <div class="input-container" style="flex: 2; min-width: 200px;">
                   <label for="filter-search">Buscar nas Observações:</label>
                   <input type="text" id="filter-search" class="form-control" placeholder="Buscar texto..." oninput="loadHistoryTable()">
@@ -1486,6 +1494,6 @@
   </div>
 
   <!-- JS App Principal -->
-  <script src="app.js?v=12.0"></script>
+  <script src="app.js?v=13.0"></script>
 </body>
 </html>
