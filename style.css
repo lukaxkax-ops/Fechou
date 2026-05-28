@@ -568,7 +568,7 @@ header {
 
 .expense-row {
   display: grid;
-  grid-template-columns: 1fr 120px 130px 42px 42px;
+  grid-template-columns: 1fr 95px 115px 42px 42px;
   gap: 8px;
   align-items: flex-end;
   background: rgba(255, 255, 255, 0.02);
@@ -1165,7 +1165,7 @@ header {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 850px) {
   /* 5. Empilhamento Inteligente de Despesas Gerais e Vales */
   .expense-row {
     grid-template-columns: 1fr 1fr auto !important;
@@ -1220,7 +1220,9 @@ header {
   #edit-vales-list-container .expense-row button {
     grid-column: span 1 !important; /* Botão excluir na direita */
   }
+}
 
+@media (max-width: 600px) {
   /* 6. Empilhamento de colunas de formulário */
   .form-grid-columns {
     gap: 16px !important;
