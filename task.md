@@ -28,7 +28,15 @@
   - [x] Criar o inline SVG do logo oficial do WhatsApp
   - [x] Injetar o logo nos botões da tabela de históricos em `app.js`
   - [x] Injetar o logo nos botões do modal de detalhes, aba de assinatura e overlay de cobrança em `index.html`
+- [x] Ajuste do Logo de Marca Oficial
+  - [x] Identificar e confirmar a integridade de `icon-512.png` como o logo correto enviado pelo usuário
+  - [x] Substituir o ícone genérico `calculator` da Lucide pelo elemento `<img>` oficial no card de login (`index.html`)
+  - [x] Substituir o ícone no cabeçalho superior (header) do operador comum (`index.html`)
+  - [x] Substituir o ícone no cabeçalho do menu lateral (sidebar) do operador comum (`index.html`)
+  - [x] Substituir o ícone do painel mestre no menu lateral do administrador (`index.html`)
+  - [x] Incrementar a versão do cache de `fechou-cache-v26` para `fechou-cache-v27` no Service Worker (`sw.js`)
 - [x] Verificação, Testes e Sincronização
   - [x] Validar todas as rotas e fluxos de dados
   - [x] Testar compatibilidade responsiva em mobile
-  - [x] Realizar commit e deploy no Netlify e GitHub Pages
+  - [x] Realizar commit e deploy no GitHub Pages do repositório oficial Fechou!
+
