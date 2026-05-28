@@ -253,6 +253,10 @@ header {
   gap: 24px;
 }
 
+.sidebar-overlay {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .main-grid {
     grid-template-columns: 1fr;
@@ -896,19 +900,14 @@ header {
 }
 
 /* --- OTIMIZAÇÃO PREMIUM PARA DISPOSITIVOS MÓVEIS (RESPONSIVIDADE MÓVEL) --- */
-@media (max-width: 768px) {
-  /* 1. Barra de Navegação Inferior Fixa (Estilo App Nativo) */
-  .main-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-  
+@media (max-width: 1024px) {
   /* 1. Menu Lateral Gaveta (Sidebar Drawer) */
   #menu-toggle-btn {
     display: inline-flex !important;
   }
   
   .sidebar-overlay {
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
@@ -1391,7 +1390,7 @@ header {
 }
 
 /* Transformação da tabela do painel mestre em cards no mobile */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   #master-users-table, 
   #master-users-table thead, 
   #master-users-table tbody, 

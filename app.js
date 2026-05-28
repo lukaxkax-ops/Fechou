@@ -4824,7 +4824,7 @@ document.addEventListener('touchend', e => {
 
 function handleSwipeGesture() {
   const sidebar = document.getElementById("app-sidebar");
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = window.innerWidth <= 1024;
   
   if (!sidebar || !isMobile) return;
   
