@@ -568,7 +568,7 @@ header {
 
 .expense-row {
   display: grid;
-  grid-template-columns: 1fr 120px 130px 42px;
+  grid-template-columns: 1fr 120px 42px;
   gap: 8px;
   align-items: flex-end;
   background: rgba(255, 255, 255, 0.02);
@@ -1168,53 +1168,24 @@ header {
 @media (max-width: 850px) {
   /* 5. Empilhamento Inteligente de Despesas Gerais e Vales */
   .expense-row {
-    grid-template-columns: 1fr 1fr auto !important;
+    grid-template-columns: 1fr auto !important;
     gap: 8px !important;
     padding: 10px !important;
   }
   
-  .expense-row .input-container {
-    grid-column: span 3 !important; /* Campos de texto ocupam largura total */
+  .expense-row .input-container:nth-child(1) {
+    grid-column: span 2 !important; /* Descrição / Nome do funcionário ocupa a linha inteira */
   }
   
-  /* Categoria e Valor ficam lado a lado com a pilha de ações no mobile para maximizar a largura dos inputs */
   .expense-row .input-container:nth-child(2) {
-    grid-column: span 1 !important; /* Valor */
+    grid-column: span 1 !important; /* Valor ocupa a esquerda na segunda linha */
   }
   
-  .expense-row .input-container:nth-child(3) {
-    grid-column: span 1 !important; /* Dropdown de Categoria */
-  }
-
-  .expense-row .expense-actions-stack {
-    grid-column: span 1 !important;
+  .expense-row .expense-actions-stack,
+  .expense-row button,
+  .expense-row .btn-icon-danger {
+    grid-column: span 1 !important; /* Botão excluir / Ações na direita na segunda linha */
     align-self: flex-end !important;
-  }
-  
-  .expense-row > button, .expense-row > .btn-icon-danger {
-    grid-column: span 1 !important;
-    align-self: flex-end !important;
-  }
-
-  /* Formatação específica para o construtor de Vales (Nome, Valor, Trash) */
-  #vales-list-container .expense-row, 
-  #edit-vales-list-container .expense-row {
-    grid-template-columns: 1fr auto !important;
-  }
-  
-  #vales-list-container .expense-row .input-container:nth-child(1),
-  #edit-vales-list-container .expense-row .input-container:nth-child(1) {
-    grid-column: span 2 !important; /* Nome do funcionário ocupa linha inteira */
-  }
-  
-  #vales-list-container .expense-row .input-container:nth-child(2),
-  #edit-vales-list-container .expense-row .input-container:nth-child(2) {
-    grid-column: span 1 !important; /* Valor ocupa esquerda */
-  }
-  
-  #vales-list-container .expense-row button,
-  #edit-vales-list-container .expense-row button {
-    grid-column: span 1 !important; /* Botão excluir na direita */
   }
 }
 

@@ -121,6 +121,17 @@ let isLicenseExpired = false;
 let deferredPrompt = null;
 let masterContactSettings = null;
 
+function getSubscriptionAmount() {
+  return (masterContactSettings && masterContactSettings.subscriptionAmount !== undefined) 
+    ? parseFloat(masterContactSettings.subscriptionAmount) 
+    : 49.90;
+}
+
+function showLicenseExpiredAlert(action) {
+  const amountStr = formatCurrency(getSubscriptionAmount());
+  alert(`⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a ${action}, realize o pagamento de ${amountStr} na aba 'Assinatura & Licença'.`);
+}
+
 // Categorias de despesas em português para exibição
 const EXPENSE_CATEGORIES = {
   vales: "Vales de Funcionários",
@@ -411,9 +422,16 @@ async function checkAuth() {
 
 // Inicializa os dados específicos do usuário logado
 function initApp() {
-  // Ajusta a data padrão para o dia atual local
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById("closing-date").value = today;
+  // Ajusta a data padrão para o dia atual local e bloqueia datas futuras
+  const localToday = new Date();
+  const todayStr = localToday.getFullYear() + "-" + String(localToday.getMonth() + 1).padStart(2, '0') + "-" + String(localToday.getDate()).padStart(2, '0');
+  
+  const dateInput = document.getElementById("closing-date");
+  if (dateInput) dateInput.value = todayStr;
+
+  document.querySelectorAll("input[type='date']").forEach(input => {
+    input.max = todayStr;
+  });
 
   // Carrega o nome da loja padrão do usuário logado do LocalStorage
   const savedStoreName = localStorage.getItem(`gastrofecho_store_name_${currentUser}`);
@@ -1136,9 +1154,9 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
   row.className = "expense-row";
   row.id = rowId;
 
-  // Usa 2 colunas para o Nome, 1 para o Valor e 1 para Excluir, totalizando as 4 colunas do grid CSS
+  // Simétrico ao novo grid CSS de 3 colunas (1fr 120px 42px)
   row.innerHTML = `
-    <div class="input-container" style="grid-column: span 2;">
+    <div class="input-container">
       <label style="font-size: 11px;">Nome do Funcionário</label>
       <input type="text" class="form-control vale-desc" placeholder="Ex: João (Adiantamento)" value="${employeeName}" required>
     </div>
@@ -1170,7 +1188,7 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
     row.dataset.photo = photo;
   }
 
-  // Categorias: Carne, Alimentos em Geral, Limpeza, Outros
+  // Grade limpa de 3 colunas: Descrição, Valor e Ações
   row.innerHTML = `
     <div class="input-container">
       <label style="font-size: 11px;">Descrição da Despesa</label>
@@ -1182,15 +1200,6 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
         <span class="input-prefix" style="left: 8px;">R$</span>
         <input type="number" step="0.01" min="0.01" class="form-control expense-val form-control-prefix" style="padding-left: 28px;" placeholder="0,00" value="${value}" oninput="updateLiveDashboard()" required>
       </div>
-    </div>
-    <div class="input-container">
-      <label style="font-size: 11px;">Categoria</label>
-      <select class="form-control expense-cat">
-        <option value="carne" ${category === 'carne' ? 'selected' : ''}>Carne</option>
-        <option value="alimentos" ${category === 'alimentos' ? 'selected' : ''}>Alimentos em Geral</option>
-        <option value="limpeza" ${category === 'limpeza' ? 'selected' : ''}>Limpeza</option>
-        <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
-      </select>
     </div>
     <div class="expense-actions-stack" style="display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 42px; margin-bottom: 0;">
       <!-- Botão de Foto -->
@@ -1576,7 +1585,7 @@ async function saveClosing(event) {
 
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a gravação de fechamentos, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("gravação de fechamentos");
     return;
   }
 
@@ -1596,14 +1605,39 @@ async function saveClosing(event) {
     return;
   }
 
+  const today = new Date();
+  const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, '0') + "-" + String(today.getDate()).padStart(2, '0');
+  if (dateInput > todayStr) {
+    alert("⚠️ Não é permitido realizar lançamentos em datas futuras.");
+    return;
+  }
+
   const shiftInput = document.getElementById("closing-shift").value;
 
-  // Verifica se já existe um fechamento para esta data E turno
+  // Verifica se já existe um fechamento para esta data E turno com exigência de Senha Admin
   const dateExists = closingsData.findIndex(c => c.date === dateInput && (c.shift || "dia") === shiftInput);
   if (dateExists !== -1) {
     const shiftLabel = shiftInput === "dia" ? "Dia" : "Noite";
-    const confirmOverwrite = confirm(`Já existe um fechamento salvo para o dia ${formatDate(dateInput)} no turno ${shiftLabel}. Deseja substituir os dados existentes?`);
-    if (!confirmOverwrite) return;
+    const inputPass = prompt(`⚠️ Já existe um fechamento salvo para o dia ${formatDate(dateInput)} no turno ${shiftLabel}. Para substituir e sobrepor os dados, insira a Senha Administrativa:`);
+    if (inputPass === null) return; // cancelou
+    
+    try {
+      const users = await dbGetUsers();
+      const user = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
+      if (!user) {
+        alert("Erro ao validar permissões.");
+        return;
+      }
+      const expectedPass = user.adminPassword || "";
+      if (inputPass !== expectedPass) {
+        alert("Senha Administrativa Incorreta! Sobrescrita rejeitada.");
+        return;
+      }
+    } catch (err) {
+      console.error("Erro ao validar senha administrativa para sobrescrita:", err);
+      alert("Erro de conexão ao validar senha administrativa. Tente novamente.");
+      return;
+    }
   }
 
   // Feedback de salvamento no botão
@@ -1648,7 +1682,8 @@ async function saveClosing(event) {
   expenseRows.forEach(row => {
     const desc = row.querySelector(".expense-desc").value.trim();
     const val = parseFloat(row.querySelector(".expense-val").value) || 0;
-    const cat = row.querySelector(".expense-cat").value;
+    const catEl = row.querySelector(".expense-cat");
+    const cat = catEl ? catEl.value : "outros";
 
     if (desc && val > 0) {
       expenses.push({
@@ -1681,7 +1716,7 @@ async function saveClosing(event) {
   const confirmWhatsApp = confirm("Deseja enviar o relatório de fechamento de caixa via WhatsApp?");
   if (confirmWhatsApp) {
     const waText = getFormattedWhatsAppText(newClosing);
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(waText)}`;
     window.open(waUrl, '_blank');
   }
   
@@ -1806,7 +1841,7 @@ function loadHistoryTable() {
           <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
         </button>
         <button class="btn btn-success btn-sm" onclick="shareWhatsAppDirect('${day.date}', '${day.shift || 'dia'}')" title="Enviar via WhatsApp" style="background: rgba(37, 211, 102, 0.12); color: #25d366; border-color: rgba(37, 211, 102, 0.2);">
-          <i data-lucide="message-square" style="width: 14px; height: 14px;"></i>
+          <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor; display: inline-block; vertical-align: middle;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.413 9.863-9.847.001-2.63-1.019-5.101-2.871-6.957C16.51 1.944 14.04 .921 11.416.92 6.136.921 1.83 5.215 1.828 10.5c-.001 1.701.447 3.362 1.3 4.8l-.995 3.636 3.73-.978L6.647 19.16z"/></svg>
         </button>
         <button class="btn btn-success btn-sm" onclick="editClosing('${day.date}', '${day.shift || 'dia'}')" title="Editar Lançamento">
           <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
@@ -1940,7 +1975,7 @@ function printDetails() {
 async function deleteClosing(dateStr, shiftStr = "dia") {
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a exclusão de fechamentos, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("exclusão de fechamentos");
     return;
   }
 
@@ -2126,7 +2161,7 @@ async function saveEditClosing(event) {
 
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a edição de fechamentos, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("edição de fechamentos");
     return;
   }
 
@@ -2183,7 +2218,8 @@ async function saveEditClosing(event) {
   expenseRows.forEach(row => {
     const desc = row.querySelector(".expense-desc").value.trim();
     const val = parseFloat(row.querySelector(".expense-val").value) || 0;
-    const cat = row.querySelector(".expense-cat").value;
+    const catEl = row.querySelector(".expense-cat");
+    const cat = catEl ? catEl.value : "outros";
 
     if (desc && val > 0) {
       expenses.push({
@@ -2286,7 +2322,7 @@ function importData(event) {
 function generateDemoData() {
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a geração de demonstrações, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("geração de demonstrações");
     return;
   }
 
@@ -2373,7 +2409,7 @@ function generateDemoData() {
 async function resetAllData() {
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a limpeza de dados, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("limpeza de dados");
     return;
   }
 
@@ -2465,7 +2501,11 @@ function getFormattedWhatsAppText(day) {
     if (e.category !== "vales") {
       let expenseText = `  • ${e.description}: ${formatCurrency(e.value)}`;
       if (e.photo) {
-        expenseText += ` (📑 Nota: ${e.photo})`;
+        if (e.photo.startsWith("http")) {
+          expenseText += ` (📑 Nota: ${e.photo})`;
+        } else {
+          expenseText += ` (📑 Nota: Anexo Local)`;
+        }
       }
       text += expenseText + `\n`;
       hasExpenses = true;
@@ -2503,7 +2543,7 @@ function shareWhatsApp() {
   }
 
   const text = getFormattedWhatsAppText(day);
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -2516,7 +2556,7 @@ function shareWhatsAppDirect(dateStr, shiftStr = "dia") {
   }
 
   const text = getFormattedWhatsAppText(day);
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -2548,6 +2588,31 @@ function toggleTheme() {
 }
 
 // --- FUNÇÕES DO PAINEL DO ACESSO MESTRE ---
+
+// Filtra a lista de operadores na aba Mestre por Loja, Telefone, E-mail ou Status
+function filterMasterUsers() {
+  const query = document.getElementById("master-users-search").value.toLowerCase().trim();
+  const rows = document.querySelectorAll("#master-users-body tr");
+  
+  rows.forEach(row => {
+    const store = (row.dataset.store || "").toLowerCase();
+    const username = (row.dataset.username || "").toLowerCase();
+    const email = (row.dataset.email || "").toLowerCase();
+    const license = (row.dataset.license || "").toLowerCase();
+    
+    let licenseLabel = "";
+    if (license === "vip") licenseLabel = "vitalício vip";
+    else if (license === "active") licenseLabel = "ativo";
+    else if (license === "test") licenseLabel = "teste";
+    else if (license === "expired") licenseLabel = "expirado";
+
+    if (store.includes(query) || username.includes(query) || email.includes(query) || license.includes(query) || licenseLabel.includes(query)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  });
+}
 
 // Carregar Dados e KPIs Administrativos do KVdb.io
 async function loadMasterPanel() {
@@ -2668,12 +2733,16 @@ async function loadMasterPanel() {
 
       let licenseHtml = "";
       const now = new Date();
+      let licenseStatus = "expired";
       if (user.isVip) {
+        licenseStatus = "vip";
         licenseHtml = `<span class="badge" style="background: rgba(124, 58, 237, 0.12); color: var(--secondary); border: 1px solid rgba(124, 58, 237, 0.2); font-weight:700;">⭐ Vitalício (VIP)</span>`;
       } else if (user.creditsUntil && new Date(user.creditsUntil) >= now) {
+        licenseStatus = "active";
         const dStr = new Date(user.creditsUntil).toLocaleDateString('pt-BR');
         licenseHtml = `<span class="badge" style="background: rgba(16, 185, 129, 0.12); color: var(--color-revenue); border: 1px solid rgba(16, 185, 129, 0.2); font-weight:700;">✅ Ativo (Até ${dStr})</span>`;
       } else if (user.trialUntil && new Date(user.trialUntil) >= now) {
+        licenseStatus = "test";
         const dStr = new Date(user.trialUntil).toLocaleDateString('pt-BR');
         licenseHtml = `<span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.2); font-weight:700;">⏳ Teste (Até ${dStr})</span>`;
       } else {
@@ -2681,6 +2750,10 @@ async function loadMasterPanel() {
       }
 
       const tr = document.createElement("tr");
+      tr.dataset.store = user.storeName || "";
+      tr.dataset.username = user.username || "";
+      tr.dataset.email = user.email || "";
+      tr.dataset.license = licenseStatus;
       tr.innerHTML = `
         <td class="bold">${user.storeName || '<span style="color: var(--text-muted); font-style: italic;">Não informada</span>'}</td>
         <td class="bold">${user.username}</td>
@@ -2987,7 +3060,7 @@ function sendRecoveryWhatsApp(username, password, adminPassword) {
     `🛡️ *Senha Administrativa:* \`${adminPassword}\`\n\n` +
     `Você já pode fazer login utilizando seu telefone e a senha de acesso acima. Guarde sua senha administrativa com segurança!`;
   
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -3236,7 +3309,7 @@ async function saveBankClosing(event) {
 
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a gravação de fechamentos, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("gravação de fechamentos");
     return;
   }
 
@@ -3256,13 +3329,38 @@ async function saveBankClosing(event) {
     return;
   }
 
+  const today = new Date();
+  const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, '0') + "-" + String(today.getDate()).padStart(2, '0');
+  if (dateInput > todayStr) {
+    alert("⚠️ Não é permitido realizar lançamentos em datas futuras.");
+    return;
+  }
+
   const shiftInput = document.getElementById("bank-closing-shift").value;
 
   const existsIndex = bankClosingsData.findIndex(c => c.date === dateInput && (c.shift || "dia") === shiftInput);
   if (existsIndex !== -1) {
     const shiftLabel = shiftInput === "dia" ? "Dia" : "Noite";
-    const confirmOverwrite = confirm(`Já existe um fechamento bancário cadastrado para o dia ${formatDate(dateInput)} no turno ${shiftLabel}. Deseja substituir os dados existentes?`);
-    if (!confirmOverwrite) return;
+    const inputPass = prompt(`⚠️ Já existe um fechamento bancário cadastrado para o dia ${formatDate(dateInput)} no turno ${shiftLabel}. Para substituir e sobrepor os dados, insira a Senha Administrativa:`);
+    if (inputPass === null) return; // cancelou
+    
+    try {
+      const users = await dbGetUsers();
+      const user = users.find(u => u.username.toLowerCase() === currentUser.toLowerCase());
+      if (!user) {
+        alert("Erro ao validar permissões.");
+        return;
+      }
+      const expectedPass = user.adminPassword || "";
+      if (inputPass !== expectedPass) {
+        alert("Senha Administrativa Incorreta! Sobrescrita rejeitada.");
+        return;
+      }
+    } catch (err) {
+      console.error("Erro ao validar senha administrativa para sobrescrita:", err);
+      alert("Erro de conexão ao validar senha administrativa. Tente novamente.");
+      return;
+    }
   }
 
   const saveBtn = event.target.querySelector("button[type='submit']");
@@ -3315,7 +3413,7 @@ async function saveBankClosing(event) {
   const confirmWhatsApp = confirm("Deseja enviar o relatório de fechamento bancário via WhatsApp?");
   if (confirmWhatsApp) {
     const waText = getFormattedBankWhatsAppText(newBankClosing);
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(waText)}`;
     window.open(waUrl, '_blank');
   }
 
@@ -3515,7 +3613,7 @@ function shareBankWhatsApp() {
   const day = bankClosingsData.find(c => c.date === currentViewBankDate && (c.shift || "dia") === currentViewBankShift);
   if (!day) return;
   const text = getFormattedBankWhatsAppText(day);
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -3523,7 +3621,7 @@ function shareBankWhatsAppDirect(dateStr, shiftStr = "dia") {
   const day = bankClosingsData.find(c => c.date === dateStr && (c.shift || "dia") === shiftStr);
   if (!day) return;
   const text = getFormattedBankWhatsAppText(day);
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -3620,7 +3718,7 @@ function viewBankDetails(dateStr, shiftStr = "dia") {
 async function deleteBankClosing(dateStr, shiftStr = "dia") {
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a exclusão de fechamentos bancários, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("exclusão de fechamentos bancários");
     return;
   }
 
@@ -3728,7 +3826,7 @@ async function saveEditBankClosing(event) {
 
   // Verifica se a licença expirou
   if (isLicenseExpired && currentUser !== "mestre") {
-    alert("⚠️ Licença Expirada: Seu aplicativo está em Modo Leitura. Para liberar a edição de fechamentos bancários, realize o pagamento de R$ 49,90 na aba 'Assinatura & Licença'.");
+    showLicenseExpiredAlert("edição de fechamentos bancários");
     return;
   }
 
@@ -4253,7 +4351,7 @@ function shareMonthlyReportWhatsApp() {
 
   const confirmWhatsApp = confirm("Deseja enviar o fechamento periódico consolidado via WhatsApp?");
   if (confirmWhatsApp) {
-    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
   }
 }
@@ -4326,7 +4424,7 @@ function shareEmployeeValesWhatsAppDirect(employeeKey) {
   if (!confirmShare) return;
 
   const text = getFormattedEmployeeValesText(emp, startInput, endInput);
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -4501,7 +4599,7 @@ function sendPixReceiptWhatsApp() {
     `👤 *Usuário (Telefone):* ${activeUser}\n\n` +
     `Estou enviando o comprovante do Pix em anexo. Aguardo a liberação da licença do meu app!`;
 
-  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
 }
 
@@ -4896,18 +4994,20 @@ async function saveMasterContactSettings(e) {
   const phoneEl = document.getElementById("master-phone-grid") || document.getElementById("master-phone");
   const pixEl = document.getElementById("master-pix-key-grid") || document.getElementById("master-pix-key");
   const imgbbEl = document.getElementById("master-imgbb-api-key-grid");
+  const subAmountEl = document.getElementById("master-subscription-amount-grid");
 
   const email = emailEl ? emailEl.value.trim() : "";
   const phone = phoneEl ? phoneEl.value.trim() : "";
   const pixKey = pixEl ? pixEl.value.trim() : "";
   const imgbbApiKey = imgbbEl ? imgbbEl.value.trim() : "";
+  const subscriptionAmount = subAmountEl ? parseFloat(subAmountEl.value) || 49.90 : 49.90;
 
   if (!email || !phone || !pixKey) {
     alert("Preencha todos os campos obrigatórios (E-mail, WhatsApp e Chave Pix) antes de salvar.");
     return;
   }
 
-  const contactData = { email, phone, pixKey, imgbbApiKey, updatedAt: new Date().toISOString() };
+  const contactData = { email, phone, pixKey, imgbbApiKey, subscriptionAmount, updatedAt: new Date().toISOString() };
 
   try {
     await fetch(UPSTASH_URL, {
@@ -4940,11 +5040,13 @@ async function loadMasterContactSettingsGrid() {
       const phoneEl = document.getElementById("master-phone-grid");
       const pixEl = document.getElementById("master-pix-key-grid");
       const imgbbEl = document.getElementById("master-imgbb-api-key-grid");
+      const subAmountEl = document.getElementById("master-subscription-amount-grid");
 
       if (emailEl) emailEl.value = contact.email || "";
       if (phoneEl) phoneEl.value = contact.phone || "";
       if (pixEl) pixEl.value = contact.pixKey || "";
       if (imgbbEl) imgbbEl.value = contact.imgbbApiKey || "";
+      if (subAmountEl) subAmountEl.value = contact.subscriptionAmount !== undefined ? contact.subscriptionAmount : 49.90;
     }
   } catch (err) {
     console.warn("Erro ao carregar configurações de contato:", err);
@@ -4954,6 +5056,7 @@ async function loadMasterContactSettingsGrid() {
 // Carrega as informações de contato do mestre para exibição na aba de Contato do operador
 async function loadUserContactInfo() {
   let pixKey = "lucas_simoes_araujo@hotmail.com";
+  let subAmount = 49.90;
   try {
     const res = await fetch(UPSTASH_URL, {
       method: "POST",
@@ -4969,6 +5072,7 @@ async function loadUserContactInfo() {
       const contact = JSON.parse(data.result);
       masterContactSettings = contact; // Guardamos globalmente para uploads das notas
       pixKey = contact.pixKey || "lucas_simoes_araujo@hotmail.com";
+      subAmount = contact.subscriptionAmount !== undefined ? parseFloat(contact.subscriptionAmount) : 49.90;
       
       if (emailSpan) emailSpan.textContent = contact.email || "Não configurado";
       if (whatsappSpan) {
@@ -4990,6 +5094,21 @@ async function loadUserContactInfo() {
     if (emailSpan) emailSpan.textContent = "Erro ao carregar";
     if (whatsappSpan) whatsappSpan.textContent = "Erro ao carregar";
   }
+
+  // Atualiza os textos da mensalidade na interface
+  const formattedAmount = formatCurrency(subAmount);
+  const bannerText = document.getElementById("license-expired-banner-text");
+  if (bannerText) {
+    bannerText.innerHTML = `Sua assinatura expirou! Os campos de preenchimento e botões de gravação/edição estão bloqueados. Realize o pagamento de ${formattedAmount} na aba 'Assinatura & Licença' para reativar.`;
+  }
+  const tabSubAmt = document.getElementById("tab-subscription-amount");
+  if (tabSubAmt) {
+    tabSubAmt.textContent = formattedAmount;
+  }
+  const overlaySubAmt = document.getElementById("overlay-subscription-amount");
+  if (overlaySubAmt) {
+    overlaySubAmt.textContent = formattedAmount;
+  }
   
   // Atualiza os dados de pagamento Pix dinamicamente
   updatePixPaymentDetails(pixKey);
@@ -4998,9 +5117,10 @@ async function loadUserContactInfo() {
 // Gera o Pix Payload (EMV) e atualiza o QR Code e o input de Copia e Cola
 function updatePixPaymentDetails(pixKey) {
   if (!pixKey) pixKey = "lucas_simoes_araujo@hotmail.com";
+  const subAmount = getSubscriptionAmount();
   
-  // Gera o payload Pix Copia e Cola oficial para R$ 49,90
-  const pixPayload = generatePixPayload(pixKey, 49.90, "FECHOU APP", "SAO PAULO");
+  // Gera o payload Pix Copia e Cola oficial para o valor correspondente
+  const pixPayload = generatePixPayload(pixKey, subAmount, "FECHOU APP", "SAO PAULO");
 
   // Exibe a chave original em formato legível embaixo dos inputs
   const rawKeyTabVal = document.getElementById("pix-key-raw-tab-val");
@@ -5015,9 +5135,10 @@ function updatePixPaymentDetails(pixKey) {
   if (pixKeyInputTab) pixKeyInputTab.value = pixPayload;
   if (pixKeyInput) pixKeyInput.value = pixPayload;
 
-  // Atualiza a imagem do QR Code
+  // Atualiza a imagem do QR Code e sua tag alt
   const pixQrImg = document.getElementById("pix-qr-img");
   if (pixQrImg) {
+    pixQrImg.alt = "Pix QR Code " + formatCurrency(subAmount);
     // Usando a API gratuita de alta qualidade do QR Server com o payload do Pix
     pixQrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=0f172a&margin=10&data=" + encodeURIComponent(pixPayload);
   }

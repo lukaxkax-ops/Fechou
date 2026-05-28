@@ -1,0 +1,34 @@
+# Tarefas - Filtro de Operadores, Mensalidade Dinâmica e Ajustes do Operador
+
+- [/] Implementação no Painel Mestre
+  - [ ] Adicionar campo de busca para filtragem na listagem de operadores (`index.html`)
+  - [ ] Implementar a lógica de filtragem instantânea `filterMasterUsers()` no `app.js`
+  - [ ] Injetar dados de Loja, Usuário, E-mail e Licença como datasets nos elementos `tr` em `loadMasterPanel()`
+  - [ ] Adicionar input de valor da mensalidade dinâmico no formulário de contato mestre (`index.html`)
+  - [ ] Persistir e ler a propriedade `subscriptionAmount` no `master_contact_settings` (salvar e ler no Upstash)
+- [ ] Injeção de Mensalidade Dinâmica no Operador Comum
+  - [ ] Mapear IDs em `license-expired-banner-text`, `tab-subscription-amount` e `overlay-subscription-amount` no HTML
+  - [ ] Atualizar `loadUserContactInfo()` para substituir as referências fixas de "R$ 49,90" pelo valor dinâmico
+  - [ ] Integrar o valor dinâmico em `updatePixPaymentDetails()` e `generatePixPayload()` para recalcular QR Code Pix
+  - [ ] Criar e utilizar o helper `showLicenseExpiredAlert(action)` para alertas consistentes de Modo Leitura
+- [ ] Ajuste no Construtor de Despesas Gerais & Vales
+  - [ ] Remover o dropdown de categoria em `addGeneralExpenseRow()` no `app.js`
+  - [ ] Atualizar `.expense-row` no `style.css` para usar grid de 3 colunas (`1fr 120px 42px`) no desktop
+  - [ ] Atualizar o alinhamento de `addValeRow()` (remover span 2 do nome)
+  - [ ] Adaptar a media query mobile no `style.css` para empilhar descrição/nome no span 2 e colocar valor e ações lado a lado
+  - [ ] Tratar com fallback `"outros"` em `saveClosing()` e `saveEditClosing()` caso o seletor `.expense-cat` seja nulo
+- [ ] Segurança & Bloqueios no Operador Comum
+  - [ ] Implementar bloqueio contra datas futuras em `saveClosing()`, `saveEditClosing()`, `saveBankClosing()` e `saveEditBankClosing()`
+  - [ ] Definir o atributo `max` para a data de hoje nos inputs de calendário na inicialização e modais
+  - [ ] Implementar a verificação de duplicidade de data e turno com exigência da **Senha Administrativa** em `saveClosing()`
+  - [ ] Implementar a mesma exigência de senha em `saveBankClosing()`
+- [ ] Correção do WhatsApp & Vetor Oficial (SVG)
+  - [ ] Tratar com fallback `(📑 Nota: Anexo Local)` em `getFormattedWhatsAppText()` caso a foto comece com `data:image` (Base64), impedindo o erro 414 de URL gigante
+  - [ ] Migrar todos os links obsoletos de `https://api.whatsapp.com/send?text=` para `https://wa.me/?text=`
+  - [ ] Criar o inline SVG do logo oficial do WhatsApp
+  - [ ] Injetar o logo nos botões da tabela de históricos em `app.js`
+  - [ ] Injetar o logo nos botões do modal de detalhes, aba de assinatura e overlay de cobrança em `index.html`
+- [ ] Verificação, Testes e Sincronização
+  - [ ] Validar todas as rotas e fluxos de dados
+  - [ ] Testar compatibilidade responsiva em mobile
+  - [ ] Realizar commit e deploy no Netlify e GitHub Pages
