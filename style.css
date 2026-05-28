@@ -1001,7 +1001,12 @@ header {
     text-align: left;
     transition: var(--transition-smooth) !important;
   }
-  
+
+  /* Garante que itens ocultados pelo JS (display: none inline) permaneçam ocultos no mobile */
+  .nav-item[style*="display: none"] {
+    display: none !important;
+  }
+
   .nav-item i {
     font-size: 18px !important;
   }
