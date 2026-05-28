@@ -3,15 +3,17 @@
   Criado com amor para permitir a instalação nativa rápida.
 */
 
-const CACHE_NAME = "fechou-cache-v29";
+const CACHE_NAME = "fechou-cache-v30";
+const BASE = "/Fechou/";
 const ASSETS = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./app.js",
-  "./manifest.json",
-  "./icon-512.png",
-  "./pix-qr.png"
+  BASE,
+  BASE + "index.html",
+  BASE + "style.css",
+  BASE + "app.js",
+  BASE + "manifest.json",
+  BASE + "icon-512.png",
+  BASE + "pix-qr.png",
+  BASE + "sw.js"
 ];
 
 // Instalação: Cacheia todos os arquivos estáticos
@@ -42,8 +44,13 @@ self.addEventListener("activate", (e) => {
 
 // Interceptador de Requisições: Network-First (com fallback de Cache)
 self.addEventListener("fetch", (e) => {
-  // Ignora requisições de APIs ou origens externas (ex: Upstash API, Google Fonts)
+  // Ignora requisições de APIs ou origens externas (ex: Upstash API, Google Fonts, ImgBB)
   if (!e.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Ignora requisições que não estão no escopo do app
+  if (!e.request.url.includes("/Fechou/") && e.request.url !== self.location.origin + "/Fechou/") {
     return;
   }
 
@@ -61,7 +68,10 @@ self.addEventListener("fetch", (e) => {
       })
       .catch(() => {
         // Em caso de offline ou falha de rede, busca no cache local
-        return caches.match(e.request);
+        return caches.match(e.request).then((cached) => {
+          // Se não encontrar o recurso específico, retorna a página principal (SPA fallback)
+          return cached || caches.match(BASE + "index.html");
+        });
       })
   );
 });
