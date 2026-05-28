@@ -906,6 +906,11 @@ header {
     display: none !important;
   }
 
+  /* Posiciona o botão de sair um pouco mais para cima no mobile para afastar do nome da loja */
+  #logout-btn {
+    margin-top: -6px !important;
+  }
+
   /* 1. Menu Lateral Gaveta (Sidebar Drawer) */
   #menu-toggle-btn {
     display: inline-flex !important;
