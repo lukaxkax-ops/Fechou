@@ -1254,49 +1254,114 @@ function handleExpensePhoto(input, rowId) {
   const file = input.files[0];
   if (!file) return;
 
+  // Feedback visual imediato: ícone de loading no botão
+  const row = document.getElementById(rowId);
+  if (row) {
+    const btn = row.querySelector(".btn-expense-photo");
+    if (btn) {
+      btn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 16px; height: 16px; color: var(--secondary);"></i>`;
+      if (window.lucide) window.lucide.createIcons();
+      btn.disabled = true;
+    }
+  }
+
+  // Função de fallback: usa o arquivo diretamente (sem canvas), para casos onde
+  // o img.onload não dispara (ex: HEIC no iOS, WebP no Android antigo, etc.)
+  function uploadFileDirect(fileToUpload) {
+    const directReader = new FileReader();
+    directReader.onload = function(ev) {
+      const dataUrl = ev.target.result;
+      const rowEl = document.getElementById(rowId);
+      if (rowEl) {
+        rowEl.dataset.photo = dataUrl;
+        updateExpenseRowPhotoUI(rowId, dataUrl);
+        uploadImageToImgBB(dataUrl, rowId);
+      }
+    };
+    directReader.onerror = function() {
+      // Último recurso: restaura botão sem foto
+      const rowEl = document.getElementById(rowId);
+      if (rowEl) {
+        const btn = rowEl.querySelector(".btn-expense-photo");
+        if (btn) {
+          btn.innerHTML = `<i data-lucide="camera" style="width: 16px; height: 16px;"></i>`;
+          btn.disabled = false;
+          if (window.lucide) window.lucide.createIcons();
+        }
+      }
+    };
+    directReader.readAsDataURL(fileToUpload);
+  }
+
   const reader = new FileReader();
   reader.onload = function(e) {
     const img = new Image();
+    let canvasProcessed = false;
+
     img.onload = function() {
-      // Compactação em Canvas no client-side para evitar estourar o limite da nuvem
-      const canvas = document.createElement("canvas");
-      let width = img.width;
-      let height = img.height;
-      const MAX_SIZE = 800; // Limite de 800px para manter altíssima nitidez e peso baixíssimo (30KB)
+      canvasProcessed = true;
+      try {
+        // Compactação em Canvas no client-side para evitar estourar o limite da nuvem
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const MAX_SIZE = 800; // Limite de 800px para manter altíssima nitidez e peso baixíssimo (30KB)
 
-      if (width > height) {
-        if (width > MAX_SIZE) {
-          height = Math.round((height * MAX_SIZE) / width);
-          width = MAX_SIZE;
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
         }
-      } else {
-        if (height > MAX_SIZE) {
-          width = Math.round((width * MAX_SIZE) / height);
-          height = MAX_SIZE;
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Converte para jpeg compactado (qualidade 0.7)
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+
+        const rowEl = document.getElementById(rowId);
+        if (rowEl) {
+          rowEl.dataset.photo = compressedDataUrl;
+          updateExpenseRowPhotoUI(rowId, compressedDataUrl);
+          // Faz o upload para o ImgBB de forma 100% automatizada e transparente em background
+          uploadImageToImgBB(compressedDataUrl, rowId);
         }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Converte para jpeg compactado (qualidade 0.7)
-      const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
-
-      const row = document.getElementById(rowId);
-      if (row) {
-        row.dataset.photo = compressedDataUrl;
-        updateExpenseRowPhotoUI(rowId, compressedDataUrl);
-        
-        // Faz o upload para o ImgBB de forma 100% automatizada e transparente em background
-        uploadImageToImgBB(compressedDataUrl, rowId);
+      } catch (canvasErr) {
+        console.warn("Canvas falhou, usando arquivo direto:", canvasErr);
+        uploadFileDirect(file);
       }
     };
+
+    // Fallback crítico para mobile (HEIC, HEIF, formatos não renderizáveis no canvas)
+    img.onerror = function() {
+      console.warn("img.onload não disparou para este arquivo. Enviando arquivo original diretamente.");
+      uploadFileDirect(file);
+    };
+
     img.src = e.target.result;
+
+    // Timeout de segurança: se em 5 segundos o img.onload não disparar, usa fallback direto
+    setTimeout(function() {
+      if (!canvasProcessed) {
+        console.warn("Timeout no carregamento da imagem. Usando fallback direto.");
+        uploadFileDirect(file);
+      }
+    }, 5000);
+  };
+  reader.onerror = function() {
+    uploadFileDirect(file);
   };
   reader.readAsDataURL(file);
 }
+
 
 // Upload assíncrono de Base64 para o ImgBB
 // Upload assíncrono de Base64 para o ImgBB
