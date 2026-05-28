@@ -272,6 +272,9 @@ async function checkAuth() {
   if (loggedUser) {
     currentUser = loggedUser;
     
+    // Carrega as configurações de contato e mensalidade do mestre logo no início
+    await loadUserContactInfo();
+    
     // Se for operador comum, checa a assinatura assincronamente na nuvem
     if (currentUser !== "mestre") {
       const hasAccess = await verifyUserSubscription(currentUser);
@@ -453,7 +456,7 @@ function initApp() {
   // Inicialização do Formulário Bancário
   const bankClosingDate = document.getElementById("bank-closing-date");
   if (bankClosingDate) {
-    bankClosingDate.value = today;
+    bankClosingDate.value = todayStr;
   }
   const bankOperatorName = document.getElementById("bank-operator-name");
   if (bankOperatorName) {
@@ -4846,7 +4849,7 @@ async function updateSubscriptionTabUI() {
       badge.style.border = "1px solid rgba(244, 63, 94, 0.3)";
       badge.textContent = "❌ Acesso Expirado";
 
-      details.innerHTML = "Sua licença expirou. Faça o pagamento Pix de <strong>R$ 49,90</strong> para liberar todas as funções.";
+      details.innerHTML = `Sua licença expirou. Faça o pagamento Pix de <strong>${formatCurrency(getSubscriptionAmount())}</strong> para liberar todas as funções.`;
 
       iconWrapper.style.background = "rgba(244, 63, 94, 0.12)";
       iconWrapper.style.color = "var(--color-expense)";
