@@ -386,6 +386,9 @@ async function checkAuth() {
     paymentOverlay.style.display = "none";
     paymentOverlay.style.opacity = "0";
 
+    const subtitleEl = document.getElementById("header-store-subtitle");
+    if (subtitleEl) subtitleEl.textContent = "Acesse sua conta";
+
     authOverlay.style.display = "flex";
     setTimeout(() => authOverlay.style.opacity = "1", 50);
     profileBadge.style.display = "none";
