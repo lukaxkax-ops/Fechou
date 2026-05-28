@@ -354,7 +354,7 @@ async function checkAuth() {
       const savedStoreName = localStorage.getItem(`gastrofecho_store_name_${currentUser}`);
       displayName = savedStoreName || currentUser;
       if (subtitleEl) {
-        subtitleEl.textContent = savedStoreName ? `Loja: ${savedStoreName}` : `Operador: ${currentUser}`;
+        subtitleEl.textContent = savedStoreName || `Operador: ${currentUser}`;
       }
       if (sidebarTitleEl) {
         sidebarTitleEl.textContent = savedStoreName || currentUser;
@@ -1029,7 +1029,7 @@ async function saveStoreNameLocal() {
   document.getElementById("user-display-name").textContent = value || currentUser;
   const subtitleEl = document.getElementById("header-store-subtitle");
   if (subtitleEl) {
-    subtitleEl.textContent = value ? `Loja: ${value}` : `Operador: ${currentUser}`;
+    subtitleEl.textContent = value || `Operador: ${currentUser}`;
   }
   const sidebarTitleEl = document.getElementById("sidebar-store-title");
   if (sidebarTitleEl) {
