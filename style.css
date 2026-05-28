@@ -901,6 +901,11 @@ header {
 
 /* --- OTIMIZAÇÃO PREMIUM PARA DISPOSITIVOS MÓVEIS (RESPONSIVIDADE MÓVEL) --- */
 @media (max-width: 1024px) {
+  /* Oculta crachá de perfil / ícone de casinha no mobile para evitar poluição visual */
+  .user-badge {
+    display: none !important;
+  }
+
   /* 1. Menu Lateral Gaveta (Sidebar Drawer) */
   #menu-toggle-btn {
     display: inline-flex !important;
