@@ -371,10 +371,11 @@ async function checkAuth() {
       // Exibe Painel Mestre
       mainGrid.style.display = "none";
       auditBanner.style.display = "none";
-      masterGrid.style.display = "block";
+      masterGrid.style.display = "grid";
       // Mestre vê "Configurações de Contato", NÃO vê "Contato"
       if (navContactConfig) navContactConfig.style.display = "";
       if (navUserContact) navUserContact.style.display = "none";
+      switchMasterSubTab('dashboard');
       loadMasterPanel();
     } else {
       // Exibe Interface Operador
@@ -2491,8 +2492,6 @@ function toggleTheme() {
 
 // Carregar Dados e KPIs Administrativos do KVdb.io
 async function loadMasterPanel() {
-  // Inicializa a sub-aba de operadores
-  switchMasterSubTab('users');
   loadUserContactInfo();
 
   const tbody = document.getElementById("master-users-body");
@@ -4546,40 +4545,71 @@ async function adminManageAccess(username) {
   }
 }
 
-// Alterna abas/sub-abas dentro do Painel do Acesso Mestre (Administração)
-function switchMasterSubTab(tab) {
-  const usersTabBtn = document.getElementById("subtab-master-users");
-  const registerTabBtn = document.getElementById("subtab-master-register");
-  const contactTabBtn = document.getElementById("subtab-master-contact");
-  const usersContainer = document.getElementById("master-users-container");
-  const registerContainer = document.getElementById("master-register-container");
-  const contactContainer = document.getElementById("master-contact-container");
+// Alternar Abas (Tabs) de Navegação do Painel Mestre
+function switchMasterTab(clickedTab) {
+  // Fecha o menu lateral no mobile se estiver aberto
+  closeSidebarMenu();
 
-  if (!usersTabBtn || !registerTabBtn || !usersContainer || !registerContainer) return;
-
-  // Reset all tabs to secondary
-  usersTabBtn.className = "btn btn-secondary btn-sm";
-  registerTabBtn.className = "btn btn-secondary btn-sm";
-  if (contactTabBtn) contactTabBtn.className = "btn btn-secondary btn-sm";
-
-  // Hide all containers
-  usersContainer.style.display = "none";
-  registerContainer.style.display = "none";
-  if (contactContainer) contactContainer.style.display = "none";
-
-  // Activate selected tab
-  if (tab === 'users') {
-    usersTabBtn.className = "btn btn-primary btn-sm";
-    usersContainer.style.display = "block";
-  } else if (tab === 'register') {
-    registerTabBtn.className = "btn btn-primary btn-sm";
-    registerContainer.style.display = "block";
-  } else if (tab === 'contact') {
-    if (contactTabBtn) contactTabBtn.className = "btn btn-primary btn-sm";
-    if (contactContainer) contactContainer.style.display = "block";
-    loadMasterContactSettingsGrid();
+  // Remove classe active de todos os itens de menu do sidebar mestre
+  const masterSidebar = document.getElementById("master-sidebar");
+  if (masterSidebar) {
+    masterSidebar.querySelectorAll(".nav-item").forEach(item => {
+      item.classList.remove("active");
+    });
   }
+  
+  // Adiciona class active no clicado
+  clickedTab.classList.add("active");
+
+  // Suporte de rolagem para navegação móvel em pills
+  try {
+    clickedTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  } catch (err) {
+    // Fallback silencioso
+  }
+  
+  // Oculta todos os painéis mestre
+  const masterGrid = document.getElementById("master-grid");
+  if (masterGrid) {
+    masterGrid.querySelectorAll(".tab-panel").forEach(panel => {
+      panel.style.display = "none";
+      panel.classList.remove("active");
+    });
+  }
+  
+  // Exibe o painel de destino
+  const targetId = clickedTab.getAttribute("data-target");
+  const targetPanel = document.getElementById(targetId);
+  if (targetPanel) {
+    targetPanel.style.display = "block";
+    setTimeout(() => targetPanel.classList.add("active"), 50);
+  }
+
+  // Ações adicionais ao abrir cada aba
+  if (targetId === "panel-master-contact") {
+    loadMasterContactSettingsGrid();
+  } else if (targetId === "panel-master-users") {
+    loadMasterPanel();
+  }
+  
   lucide.createIcons();
+}
+
+// Alterna abas/sub-abas dentro do Painel do Acesso Mestre (Retrocompatibilidade)
+function switchMasterSubTab(tab) {
+  let navItem;
+  if (tab === 'dashboard') {
+    navItem = document.getElementById("nav-master-dashboard");
+  } else if (tab === 'users') {
+    navItem = document.getElementById("nav-master-users");
+  } else if (tab === 'register') {
+    navItem = document.getElementById("nav-master-register");
+  } else if (tab === 'contact') {
+    navItem = document.getElementById("nav-master-contact");
+  }
+  if (navItem) {
+    switchMasterTab(navItem);
+  }
 }
 
 // Atualiza dinamicamente as informações e status de assinatura na aba do operador
@@ -4979,8 +5009,11 @@ function generatePixPayload(key, amount, merchantName, merchantCity) {
 
 // Abre o menu lateral retrátil no mobile
 function openSidebarMenu() {
-  const sidebar = document.getElementById("app-sidebar");
-  const overlay = document.getElementById("sidebar-overlay");
+  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre");
+  const sidebarId = isMestre ? "master-sidebar" : "app-sidebar";
+  const overlayId = isMestre ? "master-sidebar-overlay" : "sidebar-overlay";
+  const sidebar = document.getElementById(sidebarId);
+  const overlay = document.getElementById(overlayId);
   if (sidebar && overlay) {
     sidebar.classList.add("active");
     overlay.classList.add("active");
@@ -4990,8 +5023,11 @@ function openSidebarMenu() {
 
 // Fecha o menu lateral retrátil no mobile
 function closeSidebarMenu() {
-  const sidebar = document.getElementById("app-sidebar");
-  const overlay = document.getElementById("sidebar-overlay");
+  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre");
+  const sidebarId = isMestre ? "master-sidebar" : "app-sidebar";
+  const overlayId = isMestre ? "master-sidebar-overlay" : "sidebar-overlay";
+  const sidebar = document.getElementById(sidebarId);
+  const overlay = document.getElementById(overlayId);
   if (sidebar && overlay) {
     sidebar.classList.remove("active");
     overlay.classList.remove("active");
@@ -5017,7 +5053,9 @@ document.addEventListener('touchend', e => {
 }, { passive: true });
 
 function handleSwipeGesture() {
-  const sidebar = document.getElementById("app-sidebar");
+  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre");
+  const sidebarId = isMestre ? "master-sidebar" : "app-sidebar";
+  const sidebar = document.getElementById(sidebarId);
   const isMobile = window.innerWidth <= 1024;
   
   if (!sidebar || !isMobile) return;

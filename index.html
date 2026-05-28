@@ -1001,109 +1001,129 @@
     </div>
 
     <!-- PAINEL DO ACESSO MESTRE (ADMINISTRATIVO) -->
-    <div id="master-grid" style="display: none;">
-      <div class="section-card">
-        <div class="section-title-wrapper" style="margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
-          <h2 class="section-title" style="margin-right: auto;">
-            <i data-lucide="shield-check" style="color: var(--secondary);"></i> Painel de Controle Mestre (Administração)
-          </h2>
-          <button class="btn btn-secondary btn-sm" onclick="logoutUser()">
-            <i data-lucide="log-out"></i> Sair do Acesso Mestre
+    <div id="master-grid" class="main-grid" style="display: none;">
+      <!-- Sidebar / Navegação Mestre -->
+      <div class="sidebar-overlay" id="master-sidebar-overlay" onclick="closeSidebarMenu()"></div>
+      <aside class="sidebar" id="master-sidebar">
+        <div class="sidebar-header" style="display: none; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-glass); margin-bottom: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px; border-radius: 8px; box-shadow: none; background: linear-gradient(135deg, #0f1b2d, #162a44); display: flex; align-items: center; justify-content: center; color: var(--secondary);">
+              <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-title); font-size: 16px; font-weight: 800; color: var(--text-main); margin: 0;">Painel Mestre</h3>
+          </div>
+          <button class="btn btn-secondary" onclick="closeSidebarMenu()" style="width: 32px; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; border-color: var(--border-glass); flex-shrink: 0;" title="Fechar Menu">
+            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
           </button>
         </div>
-
-        <!-- Card de Controle de Manutenção (Novo!) -->
-        <div class="section-card" style="border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.02); padding: 20px; margin-bottom: 24px;">
-          <h3 style="font-family: var(--font-title); font-size: 14px; font-weight: 700; color: var(--secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="wrench"></i> Controle de Manutenção do Sistema
-          </h3>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
-            Ativar o Modo de Manutenção irá desconectar imediatamente todos os operadores logados e impedir que façam novos fechamentos ou logins. <strong>O acesso mestre continuará liberado.</strong>
-          </p>
-          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-            <button type="button" id="btn-toggle-maintenance" class="btn btn-secondary" onclick="toggleMaintenanceMode()" style="height: 42px; font-weight: 700;">
-              <i data-lucide="shield-check"></i> Consultando Estado...
-            </button>
-            <span id="maintenance-status-badge" class="badge" style="font-size: 12px; padding: 6px 12px; border-radius: 12px; font-weight: 700;">Carregando...</span>
-          </div>
-        </div>
-
-        <!-- Indicadores Rápidos -->
-        <div class="dashboard-summary" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
-          <div class="kpi-card" style="padding: 16px;">
-            <div class="kpi-icon-wrapper" style="background: rgba(124, 58, 237, 0.12); color: var(--secondary);">
+        <div class="nav-card">
+          <ul class="nav-list">
+            <li class="nav-item active" id="nav-master-dashboard" data-target="panel-master-dashboard" onclick="switchMasterTab(this)">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Painel Geral</span>
+            </li>
+            <li class="nav-item" id="nav-master-users" data-target="panel-master-users" onclick="switchMasterTab(this)">
               <i data-lucide="users"></i>
-            </div>
-            <div class="kpi-details">
-              <span class="kpi-title" style="font-size: 10px;">Operadores Cadastrados</span>
-              <span class="kpi-value" id="master-kpi-users" style="font-size: 24px;">0</span>
-              <span class="kpi-status status-neutral" style="font-size: 10px;">Ativos no aparelho</span>
-            </div>
-          </div>
-          <div class="kpi-card" style="padding: 16px;">
-            <div class="kpi-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); color: var(--color-revenue);">
-              <i data-lucide="database"></i>
-            </div>
-            <div class="kpi-details">
-              <span class="kpi-title" style="font-size: 10px;">Fechamentos Totais</span>
-              <span class="kpi-value" id="master-kpi-closings" style="font-size: 24px;">0</span>
-              <span class="kpi-status status-positive" style="font-size: 10px;">Salvos em LocalStorage</span>
-            </div>
-          </div>
-          <div class="kpi-card" style="padding: 16px;">
-            <div class="kpi-icon-wrapper" style="background: rgba(244, 63, 94, 0.12); color: var(--color-expense);">
-              <i data-lucide="key-round"></i>
-            </div>
-            <div class="kpi-details">
-              <span class="kpi-title" style="font-size: 10px;">Alertas de Senha</span>
-              <span class="kpi-value" id="master-kpi-recovery" style="font-size: 24px;">0</span>
-              <span class="kpi-status status-neutral" id="master-kpi-recovery-status" style="font-size: 10px;">Nenhuma solicitação</span>
-            </div>
-          </div>
+              <span>Operadores &amp; Acessos</span>
+            </li>
+            <li class="nav-item" id="nav-master-register" data-target="panel-master-register" onclick="switchMasterTab(this)">
+              <i data-lucide="user-plus"></i>
+              <span>Cadastrar Operador</span>
+            </li>
+            <li class="nav-item" id="nav-master-contact" data-target="panel-master-contact" onclick="switchMasterTab(this)">
+              <i data-lucide="mail"></i>
+              <span>Configurações de Contato</span>
+            </li>
+          </ul>
         </div>
+      </aside>
 
-        <!-- Alertas de Senhas Pendentes -->
-        <div id="master-recovery-requests-card" class="section-card" style="display: none; margin-bottom: 24px; border: 1px solid var(--color-expense); background: rgba(244, 63, 94, 0.03); padding: 20px;">
-          <h3 class="sub-section-title" style="color: var(--color-expense); margin-bottom: 16px;">
-            <i data-lucide="bell-ring" style="color: var(--color-expense);"></i> Solicitações Pendentes de Recuperação de Senha
-          </h3>
-          <div class="table-responsive">
-            <table class="table-premium">
-              <thead>
-                <tr>
-                  <th>Operador / Loja</th>
-                  <th>Telefone (Acesso)</th>
-                  <th>E-mail Informado</th>
-                  <th>Data da Solicitação</th>
-                  <th style="width: 220px; text-align: center;">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="master-recovery-requests-body">
-                <!-- Carregado via JS -->
-              </tbody>
-            </table>
+      <!-- Painel de Conteúdo Mestre -->
+      <main class="content-area">
+        <!-- TELA 1: Painel Geral (Manutenção, KPIs, Alertas de Senha) -->
+        <section id="panel-master-dashboard" class="tab-panel active">
+          <!-- Card de Controle de Manutenção (Novo!) -->
+          <div class="section-card" style="border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.02); padding: 20px; margin-bottom: 24px; border-radius: var(--radius-md);">
+            <h3 style="font-family: var(--font-title); font-size: 14px; font-weight: 700; color: var(--secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="wrench"></i> Controle de Manutenção do Sistema
+            </h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+              Ativar o Modo de Manutenção irá desconectar imediatamente todos os operadores logados e impedir que façam novos fechamentos ou logins. <strong>O acesso mestre continuará liberado.</strong>
+            </p>
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <button type="button" id="btn-toggle-maintenance" class="btn btn-secondary" onclick="toggleMaintenanceMode()" style="height: 42px; font-weight: 700;">
+                <i data-lucide="shield-check"></i> Consultando Estado...
+              </button>
+              <span id="maintenance-status-badge" class="badge" style="font-size: 12px; padding: 6px 12px; border-radius: 12px; font-weight: 700;">Carregando...</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Sub-abas do Painel Mestre -->
-        <div class="tabs-sub" style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; flex-wrap: wrap;">
-          <button type="button" id="subtab-master-users" class="btn btn-primary btn-sm" onclick="switchMasterSubTab('users')">
-            <i data-lucide="users"></i> Operadores &amp; Acessos
-          </button>
-          <button type="button" id="subtab-master-register" class="btn btn-secondary btn-sm" onclick="switchMasterSubTab('register')">
-            <i data-lucide="user-plus"></i> Cadastrar Operador
-          </button>
-          <button type="button" id="subtab-master-contact" class="btn btn-secondary btn-sm" onclick="switchMasterSubTab('contact')">
-            <i data-lucide="mail"></i> Configurações de Contato
-          </button>
-        </div>
+          <!-- Indicadores Rápidos -->
+          <div class="dashboard-summary" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 24px;">
+            <div class="kpi-card" style="padding: 16px;">
+              <div class="kpi-icon-wrapper" style="background: rgba(124, 58, 237, 0.12); color: var(--secondary);">
+                <i data-lucide="users"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-title" style="font-size: 10px;">Operadores Cadastrados</span>
+                <span class="kpi-value" id="master-kpi-users" style="font-size: 24px;">0</span>
+                <span class="kpi-status status-neutral" style="font-size: 10px;">Ativos no aparelho</span>
+              </div>
+            </div>
+            <div class="kpi-card" style="padding: 16px;">
+              <div class="kpi-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); color: var(--color-revenue);">
+                <i data-lucide="database"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-title" style="font-size: 10px;">Fechamentos Totais</span>
+                <span class="kpi-value" id="master-kpi-closings" style="font-size: 24px;">0</span>
+                <span class="kpi-status status-positive" style="font-size: 10px;">Salvos em LocalStorage</span>
+              </div>
+            </div>
+            <div class="kpi-card" style="padding: 16px;">
+              <div class="kpi-icon-wrapper" style="background: rgba(244, 63, 94, 0.12); color: var(--color-expense);">
+                <i data-lucide="key-round"></i>
+              </div>
+              <div class="kpi-details">
+                <span class="kpi-title" style="font-size: 10px;">Alertas de Senha</span>
+                <span class="kpi-value" id="master-kpi-recovery" style="font-size: 24px;">0</span>
+                <span class="kpi-status status-neutral" id="master-kpi-recovery-status" style="font-size: 10px;">Nenhuma solicitação</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alertas de Senhas Pendentes -->
+          <div id="master-recovery-requests-card" class="section-card" style="display: none; margin-bottom: 24px; border: 1px solid var(--color-expense); background: rgba(244, 63, 94, 0.03); padding: 20px;">
+            <h3 class="sub-section-title" style="color: var(--color-expense); margin-bottom: 16px;">
+              <i data-lucide="bell-ring" style="color: var(--color-expense);"></i> Solicitações Pendentes de Recuperação de Senha
+            </h3>
+            <div class="table-responsive">
+              <table class="table-premium">
+                <thead>
+                  <tr>
+                    <th>Operador / Loja</th>
+                    <th>Telefone (Acesso)</th>
+                    <th>E-mail Informado</th>
+                    <th>Data da Solicitação</th>
+                    <th style="width: 220px; text-align: center;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="master-recovery-requests-body">
+                  <!-- Carregado via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
         <!-- ABA MASTER 1: Lista de Usuários -->
-        <div id="master-users-container" style="display: block;">
-          <div>
-            <h3 class="sub-section-title" style="margin-bottom: 16px;">
-              <i data-lucide="shield" style="color: var(--primary);"></i> Usuários e Controle de Acessos
-            </h3>
+        <section id="panel-master-users" class="tab-panel" style="display: none;">
+          <div class="section-card">
+            <div class="section-title-wrapper" style="margin-bottom: 20px;">
+              <h2 class="section-title">
+                <i data-lucide="shield" style="color: var(--primary);"></i> Usuários e Controle de Acessos
+              </h2>
+            </div>
             <div class="table-responsive">
               <table class="table-premium" id="master-users-table">
                 <thead>
@@ -1124,73 +1144,81 @@
               </table>
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- ABA MASTER 2: Cadastro de Novos Operadores -->
-        <div id="master-register-container" style="display: none;">
-          <div class="section-card" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); padding: 24px; max-width: 600px; margin: 0 auto; border-radius: var(--radius-lg);">
-            <h3 class="sub-section-title" style="font-size: 16px; margin-bottom: 20px; text-align: center;">
-              <i data-lucide="user-plus" style="color: var(--color-revenue);"></i> Cadastrar Novo Operador
-            </h3>
-            <form id="master-create-user-form" onsubmit="adminCreateUser(event)">
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-new-store" style="font-size: 11px;">Nome da Loja</label>
-                <input type="text" id="master-new-store" class="form-control" placeholder="Nome da loja do operador" required>
-              </div>
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-new-email" style="font-size: 11px;">E-mail</label>
-                <input type="email" id="master-new-email" class="form-control" placeholder="Ex: filial@loja.com" required>
-              </div>
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-new-username" style="font-size: 11px;">Telefone (Usuário de Acesso)</label>
-                <input type="text" id="master-new-username" class="form-control" placeholder="Ex: 11999999999" required autocomplete="username">
-              </div>
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-new-password" style="font-size: 11px;">Senha de Acesso</label>
-                <input type="password" id="master-new-password" class="form-control" placeholder="Crie a senha do operador" required autocomplete="new-password">
-              </div>
-              <div class="input-container" style="margin-bottom: 20px;">
-                <label for="master-new-admin-password" style="font-size: 11px;">Senha Administrativa (Editar/Excluir Caixas)</label>
-                <input type="password" id="master-new-admin-password" class="form-control" placeholder="Crie a senha administrativa do operador" required>
-              </div>
-              <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 13px; height: 42px; font-weight: 700;">
-                <i data-lucide="user-check"></i> Cadastrar Operador
-              </button>
-            </form>
+        <section id="panel-master-register" class="tab-panel" style="display: none;">
+          <div class="section-card">
+            <div class="section-title-wrapper" style="margin-bottom: 20px;">
+              <h2 class="section-title">
+                <i data-lucide="user-plus" style="color: var(--color-revenue);"></i> Cadastrar Novo Operador
+              </h2>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); padding: 24px; max-width: 600px; margin: 0 auto; border-radius: var(--radius-lg);">
+              <form id="master-create-user-form" onsubmit="adminCreateUser(event)">
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-new-store" style="font-size: 11px;">Nome da Loja</label>
+                  <input type="text" id="master-new-store" class="form-control" placeholder="Nome da loja do operador" required>
+                </div>
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-new-email" style="font-size: 11px;">E-mail</label>
+                  <input type="email" id="master-new-email" class="form-control" placeholder="Ex: filial@loja.com" required>
+                </div>
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-new-username" style="font-size: 11px;">Telefone (Usuário de Acesso)</label>
+                  <input type="text" id="master-new-username" class="form-control" placeholder="Ex: 11999999999" required autocomplete="username">
+                </div>
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-new-password" style="font-size: 11px;">Senha de Acesso</label>
+                  <input type="password" id="master-new-password" class="form-control" placeholder="Crie a senha do operador" required autocomplete="new-password">
+                </div>
+                <div class="input-container" style="margin-bottom: 20px;">
+                  <label for="master-new-admin-password" style="font-size: 11px;">Senha Administrativa (Editar/Excluir Caixas)</label>
+                  <input type="password" id="master-new-admin-password" class="form-control" placeholder="Crie a senha administrativa do operador" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 13px; height: 42px; font-weight: 700;">
+                  <i data-lucide="user-check"></i> Cadastrar Operador
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
+        </section>
 
         <!-- ABA MASTER 3: Configurações de Contato -->
-        <div id="master-contact-container" style="display: none;">
-          <div class="section-card" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); padding: 24px; max-width: 600px; margin: 0 auto; border-radius: var(--radius-lg);">
-            <h3 class="sub-section-title" style="font-size: 16px; margin-bottom: 20px; text-align: center;">
-              <i data-lucide="mail" style="color: var(--primary);"></i> Configurações de Contato &amp; Pagamento
-            </h3>
-            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; text-align: center;">
-              Esses dados serão exibidos para os operadores na aba "Contato" e utilizados no sistema de pagamento.
-            </p>
-            <form id="master-contact-form-grid" onsubmit="saveMasterContactSettings(event)">
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-email-grid" style="font-size: 11px;"><i data-lucide="mail"></i> E‑mail de Contato</label>
-                <input type="email" id="master-email-grid" class="form-control" placeholder="ex: contato@loja.com" required>
-              </div>
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-phone-grid" style="font-size: 11px;"><i data-lucide="phone"></i> WhatsApp (Telefone)</label>
-                <input type="text" id="master-phone-grid" class="form-control" placeholder="ex: 11999999999" required>
-              </div>
-              <div class="input-container" style="margin-bottom: 12px;">
-                <label for="master-pix-key-grid" style="font-size: 11px;"><i data-lucide="qr-code"></i> Chave Pix</label>
-                <input type="text" id="master-pix-key-grid" class="form-control" placeholder="Chave Pix (copia e cola)" required>
-              </div>
-              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
-                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 13px; height: 42px; font-weight: 700;">
-                  <i data-lucide="save"></i> Salvar Configurações
-                </button>
-              </div>
-            </form>
+        <section id="panel-master-contact" class="tab-panel" style="display: none;">
+          <div class="section-card">
+            <div class="section-title-wrapper" style="margin-bottom: 20px;">
+              <h2 class="section-title">
+                <i data-lucide="mail" style="color: var(--primary);"></i> Configurações de Contato &amp; Pagamento
+              </h2>
+            </div>
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); padding: 24px; max-width: 600px; margin: 0 auto; border-radius: var(--radius-lg);">
+              <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; text-align: center;">
+                Esses dados serão exibidos para os operadores na aba "Contato" e utilizados no sistema de pagamento.
+              </p>
+              <form id="master-contact-form-grid" onsubmit="saveMasterContactSettings(event)">
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-email-grid" style="font-size: 11px;"><i data-lucide="mail"></i> E‑mail de Contato</label>
+                  <input type="email" id="master-email-grid" class="form-control" placeholder="ex: contato@loja.com" required>
+                </div>
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-phone-grid" style="font-size: 11px;"><i data-lucide="phone"></i> WhatsApp (Telefone)</label>
+                  <input type="text" id="master-phone-grid" class="form-control" placeholder="ex: 11999999999" required>
+                </div>
+                <div class="input-container" style="margin-bottom: 12px;">
+                  <label for="master-pix-key-grid" style="font-size: 11px;"><i data-lucide="qr-code"></i> Chave Pix</label>
+                  <input type="text" id="master-pix-key-grid" class="form-control" placeholder="Chave Pix (copia e cola)" required>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+                  <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 13px; height: 42px; font-weight: 700;">
+                    <i data-lucide="save"></i> Salvar Configurações
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div> <!-- Fim da master-grid -->
   </div>
 
