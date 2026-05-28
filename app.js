@@ -105,7 +105,7 @@ async function checkMaintenanceStatus() {
     const isMaintenance = await dbGetMaintenanceMode();
     if (isMaintenance && currentUser && currentUser !== "mestre") {
       alert("⚠️ O sistema entrou em modo de manutenção para atualizações. Você foi desconectado pelo administrador.");
-      logoutUser();
+      logoutUser(true); // Desconexão forçada sem popup de confirmação extra
     }
   } catch (e) {
     console.warn("Falha na checagem de manutenção periódica:", e);
@@ -783,10 +783,12 @@ function toggleLoginPassword() {
 }
 
 // Encerrar Sessão (Logout)
-function logoutUser() {
+function logoutUser(force = false) {
   try {
-    const confirmLogout = confirm("Deseja realmente encerrar sua sessão no Fechou!?");
-    if (!confirmLogout) return;
+    if (!force) {
+      const confirmLogout = confirm("Deseja realmente encerrar sua sessão no Fechou!?");
+      if (!confirmLogout) return;
+    }
 
     // Se estiver em modo auditoria, sai do modo antes de deslogar
     if (isAuditMode) {
