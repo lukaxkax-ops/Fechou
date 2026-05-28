@@ -447,6 +447,8 @@ function initApp() {
     loadBankHistoryTable();
   }
   
+  loadUserContactInfo();
+  
   lucide.createIcons();
 }
 
@@ -4341,21 +4343,34 @@ async function adminManageAccess(username) {
 function switchMasterSubTab(tab) {
   const usersTabBtn = document.getElementById("subtab-master-users");
   const registerTabBtn = document.getElementById("subtab-master-register");
+  const contactTabBtn = document.getElementById("subtab-master-contact");
   const usersContainer = document.getElementById("master-users-container");
   const registerContainer = document.getElementById("master-register-container");
+  const contactContainer = document.getElementById("master-contact-container");
 
   if (!usersTabBtn || !registerTabBtn || !usersContainer || !registerContainer) return;
 
+  // Reset all tabs to secondary
+  usersTabBtn.className = "btn btn-secondary btn-sm";
+  registerTabBtn.className = "btn btn-secondary btn-sm";
+  if (contactTabBtn) contactTabBtn.className = "btn btn-secondary btn-sm";
+
+  // Hide all containers
+  usersContainer.style.display = "none";
+  registerContainer.style.display = "none";
+  if (contactContainer) contactContainer.style.display = "none";
+
+  // Activate selected tab
   if (tab === 'users') {
     usersTabBtn.className = "btn btn-primary btn-sm";
-    registerTabBtn.className = "btn btn-secondary btn-sm";
     usersContainer.style.display = "block";
-    registerContainer.style.display = "none";
-  } else {
-    usersTabBtn.className = "btn btn-secondary btn-sm";
+  } else if (tab === 'register') {
     registerTabBtn.className = "btn btn-primary btn-sm";
-    usersContainer.style.display = "none";
     registerContainer.style.display = "block";
+  } else if (tab === 'contact') {
+    if (contactTabBtn) contactTabBtn.className = "btn btn-primary btn-sm";
+    if (contactContainer) contactContainer.style.display = "block";
+    loadMasterContactSettingsGrid();
   }
   lucide.createIcons();
 }
@@ -4571,4 +4586,103 @@ window.addEventListener("appinstalled", () => {
   
   alert("Aplicativo instalado com sucesso na sua tela de início!");
 });
+
+// =============================================
+// CONFIGURAÇÕES DE CONTATO DO MESTRE
+// =============================================
+
+// Salva as configurações de contato do mestre (e-mail, WhatsApp, chave Pix)
+async function saveMasterContactSettings(e) {
+  e.preventDefault();
+
+  // Tenta pegar dos campos do master-grid primeiro, depois do formulário antigo
+  const emailEl = document.getElementById("master-email-grid") || document.getElementById("master-email");
+  const phoneEl = document.getElementById("master-phone-grid") || document.getElementById("master-phone");
+  const pixEl = document.getElementById("master-pix-key-grid") || document.getElementById("master-pix-key");
+
+  const email = emailEl ? emailEl.value.trim() : "";
+  const phone = phoneEl ? phoneEl.value.trim() : "";
+  const pixKey = pixEl ? pixEl.value.trim() : "";
+
+  if (!email || !phone || !pixKey) {
+    alert("Preencha todos os campos antes de salvar.");
+    return;
+  }
+
+  const contactData = { email, phone, pixKey, updatedAt: new Date().toISOString() };
+
+  try {
+    await fetch(UPSTASH_URL, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + UPSTASH_TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify(["SET", "master_contact_settings", JSON.stringify(contactData)])
+    });
+    alert("Configurações de contato salvas com sucesso!");
+  } catch (err) {
+    console.error("Erro ao salvar configurações de contato:", err);
+    alert("Erro ao salvar. Tente novamente.");
+  }
+}
+
+// Carrega as configurações de contato do mestre nos campos do master-grid
+async function loadMasterContactSettingsGrid() {
+  try {
+    const res = await fetch(UPSTASH_URL, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + UPSTASH_TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify(["GET", "master_contact_settings"])
+    });
+    const data = await res.json();
+
+    if (data.result) {
+      const contact = JSON.parse(data.result);
+      const emailEl = document.getElementById("master-email-grid");
+      const phoneEl = document.getElementById("master-phone-grid");
+      const pixEl = document.getElementById("master-pix-key-grid");
+
+      if (emailEl) emailEl.value = contact.email || "";
+      if (phoneEl) phoneEl.value = contact.phone || "";
+      if (pixEl) pixEl.value = contact.pixKey || "";
+    }
+  } catch (err) {
+    console.warn("Erro ao carregar configurações de contato:", err);
+  }
+}
+
+// Carrega as informações de contato do mestre para exibição na aba de Contato do operador
+async function loadUserContactInfo() {
+  try {
+    const res = await fetch(UPSTASH_URL, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + UPSTASH_TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify(["GET", "master_contact_settings"])
+    });
+    const data = await res.json();
+
+    const emailSpan = document.getElementById("user-contact-email");
+    const whatsappSpan = document.getElementById("user-contact-whatsapp");
+
+    if (data.result) {
+      const contact = JSON.parse(data.result);
+      if (emailSpan) emailSpan.textContent = contact.email || "Não configurado";
+      if (whatsappSpan) {
+        const phoneNumber = (contact.phone || "").replace(/\D/g, "");
+        if (phoneNumber) {
+          whatsappSpan.innerHTML = '<a href="https://wa.me/55' + phoneNumber + '" target="_blank" style="color: var(--color-revenue); text-decoration: underline;">' + contact.phone + '</a>';
+        } else {
+          whatsappSpan.textContent = "Não configurado";
+        }
+      }
+    } else {
+      if (emailSpan) emailSpan.textContent = "Não configurado";
+      if (whatsappSpan) whatsappSpan.textContent = "Não configurado";
+    }
+  } catch (err) {
+    console.warn("Erro ao carregar informações de contato:", err);
+    const emailSpan = document.getElementById("user-contact-email");
+    const whatsappSpan = document.getElementById("user-contact-whatsapp");
+    if (emailSpan) emailSpan.textContent = "Erro ao carregar";
+    if (whatsappSpan) whatsappSpan.textContent = "Erro ao carregar";
+  }
+}
 

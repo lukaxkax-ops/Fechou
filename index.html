@@ -1071,13 +1071,16 @@
           </div>
         </div>
 
-        <!-- Sub-abas do Painel Mestre (Novo!) -->
-        <div class="tabs-sub" style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px;">
+        <!-- Sub-abas do Painel Mestre -->
+        <div class="tabs-sub" style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; flex-wrap: wrap;">
           <button type="button" id="subtab-master-users" class="btn btn-primary btn-sm" onclick="switchMasterSubTab('users')">
-            <i data-lucide="users"></i> Operadores & Acessos
+            <i data-lucide="users"></i> Operadores &amp; Acessos
           </button>
           <button type="button" id="subtab-master-register" class="btn btn-secondary btn-sm" onclick="switchMasterSubTab('register')">
             <i data-lucide="user-plus"></i> Cadastrar Operador
+          </button>
+          <button type="button" id="subtab-master-contact" class="btn btn-secondary btn-sm" onclick="switchMasterSubTab('contact')">
+            <i data-lucide="mail"></i> Configurações de Contato
           </button>
         </div>
 
@@ -1139,6 +1142,37 @@
               <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 13px; height: 42px; font-weight: 700;">
                 <i data-lucide="user-check"></i> Cadastrar Operador
               </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- ABA MASTER 3: Configurações de Contato -->
+        <div id="master-contact-container" style="display: none;">
+          <div class="section-card" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); padding: 24px; max-width: 600px; margin: 0 auto; border-radius: var(--radius-lg);">
+            <h3 class="sub-section-title" style="font-size: 16px; margin-bottom: 20px; text-align: center;">
+              <i data-lucide="mail" style="color: var(--primary);"></i> Configurações de Contato &amp; Pagamento
+            </h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; text-align: center;">
+              Esses dados serão exibidos para os operadores na aba "Contato" e utilizados no sistema de pagamento.
+            </p>
+            <form id="master-contact-form-grid" onsubmit="saveMasterContactSettings(event)">
+              <div class="input-container" style="margin-bottom: 12px;">
+                <label for="master-email-grid" style="font-size: 11px;"><i data-lucide="mail"></i> E‑mail de Contato</label>
+                <input type="email" id="master-email-grid" class="form-control" placeholder="ex: contato@loja.com" required>
+              </div>
+              <div class="input-container" style="margin-bottom: 12px;">
+                <label for="master-phone-grid" style="font-size: 11px;"><i data-lucide="phone"></i> WhatsApp (Telefone)</label>
+                <input type="text" id="master-phone-grid" class="form-control" placeholder="ex: 11999999999" required>
+              </div>
+              <div class="input-container" style="margin-bottom: 12px;">
+                <label for="master-pix-key-grid" style="font-size: 11px;"><i data-lucide="qr-code"></i> Chave Pix</label>
+                <input type="text" id="master-pix-key-grid" class="form-control" placeholder="Chave Pix (copia e cola)" required>
+              </div>
+              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 13px; height: 42px; font-weight: 700;">
+                  <i data-lucide="save"></i> Salvar Configurações
+                </button>
+              </div>
             </form>
           </div>
         </div>
