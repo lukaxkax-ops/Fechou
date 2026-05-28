@@ -110,8 +110,11 @@
  
   <div class="app-container">
     <!-- Header -->
-    <header>
-      <div class="logo-section">
+    <header style="display: flex; align-items: center;">
+      <button id="menu-toggle-btn" class="btn btn-secondary" onclick="openSidebarMenu()" style="height: 42px; width: 42px; padding: 0; display: none; align-items: center; justify-content: center; border-radius: 50%; border-color: var(--border-glass); margin-right: 12px; z-index: 101; flex-shrink: 0;" title="Abrir Menu Lateral">
+        <i data-lucide="menu" style="width: 20px; height: 20px; color: var(--text-main);"></i>
+      </button>
+      <div class="logo-section" style="flex: 1;">
         <div class="logo-icon">
           <i data-lucide="calculator"></i>
         </div>
@@ -149,7 +152,19 @@
     <!-- Grid Principal -->
     <div class="main-grid">
       <!-- Sidebar / Navegação -->
-      <aside class="sidebar">
+      <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebarMenu()"></div>
+      <aside class="sidebar" id="app-sidebar">
+        <div class="sidebar-header" style="display: none; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-glass); margin-bottom: 16px; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="logo-icon" style="width: 32px; height: 32px; font-size: 16px; border-radius: 8px; box-shadow: none;">
+              <i data-lucide="calculator" style="width: 16px; height: 16px;"></i>
+            </div>
+            <h3 style="font-family: var(--font-title); font-size: 16px; font-weight: 800; color: #fff; margin: 0;">Fechou!</h3>
+          </div>
+          <button class="btn btn-secondary" onclick="closeSidebarMenu()" style="width: 32px; height: 32px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; border-color: var(--border-glass); flex-shrink: 0;" title="Fechar Menu">
+            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+          </button>
+        </div>
         <div class="nav-card">
           <ul class="nav-list">
             <li class="nav-item active" data-target="panel-today" onclick="switchTab(this)">

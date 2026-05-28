@@ -1046,6 +1046,9 @@ async function saveOperatorNameLocal() {
 
 // Alternar Abas (Tabs) de Navegação
 function switchTab(clickedTab) {
+  // Fecha o menu lateral no mobile se estiver aberto
+  closeSidebarMenu();
+
   // Remove classe active de todos os itens de menu
   document.querySelectorAll(".nav-item").forEach(item => {
     item.classList.remove("active");
@@ -4772,5 +4775,70 @@ function generatePixPayload(key, amount, merchantName, merchantCity) {
   }
   const crcString = crc.toString(16).toUpperCase().padStart(4, '0');
   return payload + crcString;
+}
+
+// =============================================
+// CONTROLE DO MENU LATERAL GAVETA (SIDEBAR DRAWER)
+// =============================================
+
+// Abre o menu lateral retrátil no mobile
+function openSidebarMenu() {
+  const sidebar = document.getElementById("app-sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+  if (sidebar && overlay) {
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden"; // Impede rolagem da página por baixo
+  }
+}
+
+// Fecha o menu lateral retrátil no mobile
+function closeSidebarMenu() {
+  const sidebar = document.getElementById("app-sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+  if (sidebar && overlay) {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+    document.body.style.overflow = ""; // Restaura rolagem
+  }
+}
+
+// GESTOS DE TOQUE E DESLIZAMENTO (SWIPE GESTURES) PARA VERSÃO MOBILE
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleSwipeGesture();
+}, { passive: true });
+
+function handleSwipeGesture() {
+  const sidebar = document.getElementById("app-sidebar");
+  const isMobile = window.innerWidth <= 768;
+  
+  if (!sidebar || !isMobile) return;
+  
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  // Garante que o swipe seja essencialmente horizontal (evita disparar ao rolar verticalmente)
+  if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) return;
+  
+  // 1. Puxar da borda esquerda (X < 40px) para a direita para ABRIR o menu
+  if (deltaX > 60 && touchStartX < 40 && !sidebar.classList.contains("active")) {
+    openSidebarMenu();
+  }
+  // 2. Deslizar da direita para a esquerda em qualquer lugar para FECHAR o menu se estiver ativo
+  else if (deltaX < -60 && sidebar.classList.contains("active")) {
+    closeSidebarMenu();
+  }
 }
 
