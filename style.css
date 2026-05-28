@@ -568,7 +568,7 @@ header {
 
 .expense-row {
   display: grid;
-  grid-template-columns: 1fr 95px 115px 42px 42px;
+  grid-template-columns: 1fr 1fr 90px 110px 42px 42px;
   gap: 8px;
   align-items: flex-end;
   background: rgba(255, 255, 255, 0.02);
@@ -1214,11 +1214,6 @@ header {
   #vales-list-container .expense-row .input-container:nth-child(2),
   #edit-vales-list-container .expense-row .input-container:nth-child(2) {
     grid-column: span 1 !important; /* Valor ocupa esquerda */
-  }
-
-  #vales-list-container .expense-row .desktop-only-spacer,
-  #edit-vales-list-container .expense-row .desktop-only-spacer {
-    display: none !important; /* Oculta espaçador no mobile */
   }
   
   #vales-list-container .expense-row button,

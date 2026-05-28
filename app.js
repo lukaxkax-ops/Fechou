@@ -1173,7 +1173,7 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
 
   // Categorias: Carne, Alimentos em Geral, Limpeza, Outros
   row.innerHTML = `
-    <div class="input-container">
+    <div class="input-container" style="grid-column: span 2;">
       <label style="font-size: 11px;">Descrição da Despesa</label>
       <input type="text" class="form-control expense-desc" placeholder="Ex: Pão de Hambúrguer" value="${description}" required>
     </div>
