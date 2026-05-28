@@ -345,14 +345,19 @@ async function checkAuth() {
     profileBadge.style.display = "inline-flex";
     let displayName = "GastroFecho";
     const subtitleEl = document.getElementById("header-store-subtitle");
+    const sidebarTitleEl = document.getElementById("sidebar-store-title");
     if (currentUser === "mestre") {
       displayName = "Administrador Mestre";
       if (subtitleEl) subtitleEl.textContent = "Painel Administrativo Mestre";
+      if (sidebarTitleEl) sidebarTitleEl.textContent = "Fechou! Mestre";
     } else {
       const savedStoreName = localStorage.getItem(`gastrofecho_store_name_${currentUser}`);
       displayName = savedStoreName || currentUser;
       if (subtitleEl) {
         subtitleEl.textContent = savedStoreName ? `Loja: ${savedStoreName}` : `Operador: ${currentUser}`;
+      }
+      if (sidebarTitleEl) {
+        sidebarTitleEl.textContent = savedStoreName || currentUser;
       }
     }
     document.getElementById("user-display-name").textContent = displayName;
@@ -388,6 +393,9 @@ async function checkAuth() {
 
     const subtitleEl = document.getElementById("header-store-subtitle");
     if (subtitleEl) subtitleEl.textContent = "Acesse sua conta";
+
+    const sidebarTitleEl = document.getElementById("sidebar-store-title");
+    if (sidebarTitleEl) sidebarTitleEl.textContent = "Fechou!";
 
     authOverlay.style.display = "flex";
     setTimeout(() => authOverlay.style.opacity = "1", 50);
@@ -1022,6 +1030,10 @@ async function saveStoreNameLocal() {
   const subtitleEl = document.getElementById("header-store-subtitle");
   if (subtitleEl) {
     subtitleEl.textContent = value ? `Loja: ${value}` : `Operador: ${currentUser}`;
+  }
+  const sidebarTitleEl = document.getElementById("sidebar-store-title");
+  if (sidebarTitleEl) {
+    sidebarTitleEl.textContent = value || currentUser;
   }
 
   try {
