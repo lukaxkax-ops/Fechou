@@ -1215,6 +1215,11 @@ header {
   #edit-vales-list-container .expense-row .input-container:nth-child(2) {
     grid-column: span 1 !important; /* Valor ocupa esquerda */
   }
+
+  #vales-list-container .expense-row .desktop-only-spacer,
+  #edit-vales-list-container .expense-row .desktop-only-spacer {
+    display: none !important; /* Oculta espaçador no mobile */
+  }
   
   #vales-list-container .expense-row button,
   #edit-vales-list-container .expense-row button {

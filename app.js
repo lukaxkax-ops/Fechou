@@ -1134,9 +1134,9 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
   row.className = "expense-row";
   row.id = rowId;
 
-  // Usa 2 colunas para o Nome, 1 para o Valor e 1 para Excluir, totalizando as 4 colunas do grid CSS
+  // Alinha perfeitamente com o construtor de despesas gerais usando as mesmas 5 colunas do grid
   row.innerHTML = `
-    <div class="input-container" style="grid-column: span 2;">
+    <div class="input-container">
       <label style="font-size: 11px;">Nome do Funcionário</label>
       <input type="text" class="form-control vale-desc" placeholder="Ex: João (Adiantamento)" value="${employeeName}" required>
     </div>
@@ -1147,7 +1147,10 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
         <input type="number" step="0.01" min="0.01" class="form-control vale-val form-control-prefix" style="padding-left: 28px;" placeholder="0,00" value="${value}" oninput="updateLiveDashboard()" required>
       </div>
     </div>
-    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale">
+    <div class="input-container desktop-only-spacer" style="grid-column: span 2;">
+      <!-- Espaçador para alinhamento estético perfeito no desktop -->
+    </div>
+    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale" style="margin-bottom: 0; align-self: flex-end; height: 42px;">
       <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
     </button>
   `;
