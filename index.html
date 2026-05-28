@@ -723,11 +723,12 @@
                     <label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Chave Pix:</label>
                     <div style="display: flex; gap: 8px; align-items: center;">
                       <input type="text" id="pix-key-input-tab" class="form-control" value="lucas_simoes_araujo@hotmail.com" readonly style="font-family: monospace; font-size: 13px; font-weight: 600; background: rgba(0,0,0,0.2); border-color: var(--border-glass); color: #fff; height: 38px; flex: 1;">
-                      <button type="button" class="btn btn-secondary" onclick="copyPixKeyTab()" style="height: 38px; width: auto; padding: 0 12px; border-color: var(--border-glass); flex-shrink: 0;" title="Copiar Chave Pix">
+                      <button type="button" class="btn btn-secondary" onclick="copyPixKeyTab()" style="height: 38px; width: auto; padding: 0 12px; border-color: var(--border-glass); flex-shrink: 0;" title="Copiar Pix Copia e Cola">
                         <i id="pix-copy-icon-tab" data-lucide="copy" style="width: 16px; height: 16px; margin: 0;"></i>
                       </button>
                     </div>
-                    <span id="pix-copy-feedback-tab" style="font-size: 11px; color: var(--secondary); display: none; margin-top: 6px; font-weight: 500;"><i data-lucide="check" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Chave Copiada com sucesso!</span>
+                    <span id="pix-key-raw-tab" style="font-size: 11px; color: var(--text-secondary); display: block; margin-top: 6px; font-weight: 500;">Chave Pix (E-mail): <strong style="color: #fff;" id="pix-key-raw-tab-val">lucas_simoes_araujo@hotmail.com</strong></span>
+                    <span id="pix-copy-feedback-tab" style="font-size: 11px; color: var(--secondary); display: none; margin-top: 6px; font-weight: 500;"><i data-lucide="check" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Pix Copia e Cola copiado com sucesso!</span>
                   </div>
                 </div>
 
@@ -744,7 +745,7 @@
                 </h4>
                 
                 <div style="background: #ffffff; padding: 12px; border-radius: var(--radius-lg); width: 220px; height: 220px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                  <img src="pix-qr.png" alt="Pix QR Code R$ 49,90" style="max-width: 100%; max-height: 100%; border-radius: var(--radius-md);">
+                  <img id="pix-qr-img" src="pix-qr.png" alt="Pix QR Code R$ 49,90" style="max-width: 100%; max-height: 100%; border-radius: var(--radius-md);">
                 </div>
 
                 <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; max-width: 280px; margin: 0 auto;">
@@ -1404,11 +1405,12 @@
           <label style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 6px;">Chave Pix:</label>
           <div style="display: flex; gap: 8px; align-items: center;">
             <input type="text" id="pix-key-input" class="form-control" value="lucas_simoes_araujo@hotmail.com" readonly style="font-family: monospace; font-size: 13px; font-weight: 600; background: rgba(0,0,0,0.2); border-color: var(--border-glass); color: #fff; height: 38px;">
-            <button type="button" class="btn btn-secondary" onclick="copyPixKey()" style="height: 38px; width: auto; padding: 0 12px; border-color: var(--border-glass); flex-shrink: 0;" title="Copiar Chave Pix">
+            <button type="button" class="btn btn-secondary" onclick="copyPixKey()" style="height: 38px; width: auto; padding: 0 12px; border-color: var(--border-glass); flex-shrink: 0;" title="Copiar Pix Copia e Cola">
               <i id="pix-copy-icon" data-lucide="copy" style="width: 16px; height: 16px; margin: 0;"></i>
             </button>
           </div>
-          <span id="pix-copy-feedback" style="font-size: 11px; color: var(--secondary); display: none; margin-top: 4px; font-weight: 500;"><i data-lucide="check" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Chave Copiada com sucesso!</span>
+          <span id="pix-key-raw-overlay" style="font-size: 11px; color: var(--text-secondary); display: block; margin-top: 6px; font-weight: 500;">Chave Pix (E-mail): <strong style="color: #fff;" id="pix-key-raw-overlay-val">lucas_simoes_araujo@hotmail.com</strong></span>
+          <span id="pix-copy-feedback" style="font-size: 11px; color: var(--secondary); display: none; margin-top: 4px; font-weight: 500;"><i data-lucide="check" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i> Pix Copia e Cola copiado com sucesso!</span>
         </div>
       </div>
 

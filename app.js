@@ -1053,6 +1053,13 @@ function switchTab(clickedTab) {
   
   // Adiciona class active no clicado
   clickedTab.classList.add("active");
+
+  // Suporte de rolagem para navegação móvel em pills (mantém o item ativo centralizado)
+  try {
+    clickedTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  } catch (err) {
+    // Fallback silencioso caso não suportado
+  }
   
   // Oculta todas as abas
   document.querySelectorAll(".tab-panel").forEach(panel => {
@@ -2287,6 +2294,7 @@ function toggleTheme() {
 async function loadMasterPanel() {
   // Inicializa a sub-aba de operadores
   switchMasterSubTab('users');
+  loadUserContactInfo();
 
   const tbody = document.getElementById("master-users-body");
   tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 25px; color: var(--text-secondary);"><i data-lucide="loader-2" class="spin" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;"></i> Carregando operadores da nuvem...</td></tr>`;
@@ -4651,6 +4659,7 @@ async function loadMasterContactSettingsGrid() {
 
 // Carrega as informações de contato do mestre para exibição na aba de Contato do operador
 async function loadUserContactInfo() {
+  let pixKey = "lucas_simoes_araujo@hotmail.com";
   try {
     const res = await fetch(UPSTASH_URL, {
       method: "POST",
@@ -4664,6 +4673,8 @@ async function loadUserContactInfo() {
 
     if (data.result) {
       const contact = JSON.parse(data.result);
+      pixKey = contact.pixKey || "lucas_simoes_araujo@hotmail.com";
+      
       if (emailSpan) emailSpan.textContent = contact.email || "Não configurado";
       if (whatsappSpan) {
         const phoneNumber = (contact.phone || "").replace(/\D/g, "");
@@ -4684,5 +4695,82 @@ async function loadUserContactInfo() {
     if (emailSpan) emailSpan.textContent = "Erro ao carregar";
     if (whatsappSpan) whatsappSpan.textContent = "Erro ao carregar";
   }
+  
+  // Atualiza os dados de pagamento Pix dinamicamente
+  updatePixPaymentDetails(pixKey);
+}
+
+// Gera o Pix Payload (EMV) e atualiza o QR Code e o input de Copia e Cola
+function updatePixPaymentDetails(pixKey) {
+  if (!pixKey) pixKey = "lucas_simoes_araujo@hotmail.com";
+  
+  // Gera o payload Pix Copia e Cola oficial para R$ 49,90
+  const pixPayload = generatePixPayload(pixKey, 49.90, "FECHOU APP", "SAO PAULO");
+
+  // Exibe a chave original em formato legível embaixo dos inputs
+  const rawKeyTabVal = document.getElementById("pix-key-raw-tab-val");
+  const rawKeyOverlayVal = document.getElementById("pix-key-raw-overlay-val");
+  if (rawKeyTabVal) rawKeyTabVal.textContent = pixKey;
+  if (rawKeyOverlayVal) rawKeyOverlayVal.textContent = pixKey;
+
+  // Atualiza os inputs de "Copia e Cola" nas telas
+  const pixKeyInputTab = document.getElementById("pix-key-input-tab");
+  const pixKeyInput = document.getElementById("pix-key-input");
+
+  if (pixKeyInputTab) pixKeyInputTab.value = pixPayload;
+  if (pixKeyInput) pixKeyInput.value = pixPayload;
+
+  // Atualiza a imagem do QR Code
+  const pixQrImg = document.getElementById("pix-qr-img");
+  if (pixQrImg) {
+    // Usando a API gratuita de alta qualidade do QR Server com o payload do Pix
+    pixQrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&color=0f172a&margin=10&data=" + encodeURIComponent(pixPayload);
+  }
+}
+
+// Gerador de Payload Pix Estático (Padrão EMV do Banco Central do Brasil)
+function generatePixPayload(key, amount, merchantName, merchantCity) {
+  // Merchant Account Info
+  const accountInfo = 
+    "0014br.gov.bcb.pix" + 
+    "01" + String(key.length).padStart(2, '0') + key;
+  
+  const payloadFormat = "000201";
+  const merchantCategory = "52040000";
+  const transactionCurrency = "5303986";
+  const countryCode = "5802BR";
+  
+  const formattedName = merchantName.substring(0, 25).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const formattedCity = merchantCity.substring(0, 15).toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  const merchantNameField = "59" + String(formattedName.length).padStart(2, '0') + formattedName;
+  const merchantCityField = "60" + String(formattedCity.length).padStart(2, '0') + formattedCity;
+  
+  const transactionAmountField = amount ? ("54" + String(amount.toFixed(2).length).padStart(2, '0') + amount.toFixed(2)) : "";
+  const merchantAccountField = "26" + String(accountInfo.length).padStart(2, '0') + accountInfo;
+  
+  const additionalData = "62070503***"; // Sem transação ID específica
+  
+  let payload = 
+    payloadFormat + 
+    merchantAccountField + 
+    merchantCategory + 
+    transactionCurrency + 
+    transactionAmountField + 
+    countryCode + 
+    merchantNameField + 
+    merchantCityField + 
+    additionalData + 
+    "6304";
+  
+  // Calcula o CRC16 CCITT
+  let crc = 0xFFFF;
+  for (let i = 0; i < payload.length; i++) {
+    let x = ((crc >> 8) ^ payload.charCodeAt(i)) & 0xFF;
+    x ^= x >> 4;
+    crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ (x << 0)) & 0xFFFF;
+  }
+  const crcString = crc.toString(16).toUpperCase().padStart(4, '0');
+  return payload + crcString;
 }
 
