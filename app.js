@@ -344,11 +344,16 @@ async function checkAuth() {
     
     profileBadge.style.display = "inline-flex";
     let displayName = "GastroFecho";
+    const subtitleEl = document.getElementById("header-store-subtitle");
     if (currentUser === "mestre") {
       displayName = "Administrador Mestre";
+      if (subtitleEl) subtitleEl.textContent = "Painel Administrativo Mestre";
     } else {
       const savedStoreName = localStorage.getItem(`gastrofecho_store_name_${currentUser}`);
       displayName = savedStoreName || currentUser;
+      if (subtitleEl) {
+        subtitleEl.textContent = savedStoreName ? `Loja: ${savedStoreName}` : `Operador: ${currentUser}`;
+      }
     }
     document.getElementById("user-display-name").textContent = displayName;
     logoutBtn.style.display = "inline-flex";
@@ -1011,6 +1016,10 @@ async function saveStoreNameLocal() {
   
   // Atualiza o crachá superior em tempo real
   document.getElementById("user-display-name").textContent = value || currentUser;
+  const subtitleEl = document.getElementById("header-store-subtitle");
+  if (subtitleEl) {
+    subtitleEl.textContent = value ? `Loja: ${value}` : `Operador: ${currentUser}`;
+  }
 
   try {
     // Atualiza no documento do usuário na nuvem
