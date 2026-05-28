@@ -1781,19 +1781,54 @@ function formatDate(dateStr) {
   return dateStr;
 }
 
+function populateOperatorFilter() {
+  const select = document.getElementById("filter-operator");
+  if (!select) return;
+  const currentValue = select.value;
+  
+  const operators = [];
+  closingsData.forEach(c => {
+    if (c.operatorName && !operators.includes(c.operatorName)) {
+      operators.push(c.operatorName);
+    }
+  });
+  
+  // Se o número de opções (menos a padrão "Todos") é diferente, reconstrói
+  if (select.options.length - 1 !== operators.length) {
+    select.innerHTML = '<option value="all">👤 Todos os Responsáveis</option>';
+    operators.forEach(op => {
+      const opt = document.createElement("option");
+      opt.value = op;
+      opt.textContent = `👤 ${op}`;
+      select.appendChild(opt);
+    });
+    
+    if (operators.includes(currentValue)) {
+      select.value = currentValue;
+    } else {
+      select.value = "all";
+    }
+  }
+}
+
 function clearFilters() {
   document.getElementById("filter-start-date").value = "";
   document.getElementById("filter-end-date").value = "";
   const shiftFilter = document.getElementById("filter-shift");
   if (shiftFilter) shiftFilter.value = "all";
+  const opFilter = document.getElementById("filter-operator");
+  if (opFilter) opFilter.value = "all";
   document.getElementById("filter-search").value = "";
   loadHistoryTable();
 }
 
 function loadHistoryTable() {
+  populateOperatorFilter();
+
   const startDate = document.getElementById("filter-start-date").value;
   const endDate = document.getElementById("filter-end-date").value;
   const shiftFilter = document.getElementById("filter-shift") ? document.getElementById("filter-shift").value : "all";
+  const opFilter = document.getElementById("filter-operator") ? document.getElementById("filter-operator").value : "all";
   const search = document.getElementById("filter-search").value.toLowerCase();
 
   const filtered = closingsData.filter(day => {
@@ -1803,6 +1838,8 @@ function loadHistoryTable() {
     if (endDate && day.date > endDate) return false;
     // Filtro de turno
     if (shiftFilter && shiftFilter !== "all" && (day.shift || "dia") !== shiftFilter) return false;
+    // Filtro de responsável
+    if (opFilter && opFilter !== "all" && day.operatorName !== opFilter) return false;
     // Filtro de busca de texto nas observações e despesas
     if (search) {
       const matchNotes = day.notes.toLowerCase().includes(search);
