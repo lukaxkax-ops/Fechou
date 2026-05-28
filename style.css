@@ -1177,9 +1177,9 @@ header {
     grid-column: span 3 !important; /* Campos de texto ocupam largura total */
   }
   
-  /* Categoria e Valor ficam lado a lado */
+  /* Categoria e Valor ficam lado a lado com a pilha de ações no mobile para maximizar a largura dos inputs */
   .expense-row .input-container:nth-child(2) {
-    grid-column: span 2 !important; /* Valor */
+    grid-column: span 1 !important; /* Valor */
   }
   
   .expense-row .input-container:nth-child(3) {
@@ -1191,7 +1191,7 @@ header {
     align-self: flex-end !important;
   }
   
-  .expense-row button, .expense-row .btn-icon-danger {
+  .expense-row > button, .expense-row > .btn-icon-danger {
     grid-column: span 1 !important;
     align-self: flex-end !important;
   }
