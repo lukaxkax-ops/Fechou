@@ -119,6 +119,7 @@ let isAuditMode = false;
 let auditedUser = null;
 let isLicenseExpired = false;
 let deferredPrompt = null;
+let masterContactSettings = null;
 
 // Categorias de despesas em português para exibição
 const EXPENSE_CATEGORIES = {
@@ -1275,11 +1276,65 @@ function handleExpensePhoto(input, rowId) {
       if (row) {
         row.dataset.photo = compressedDataUrl;
         updateExpenseRowPhotoUI(rowId, compressedDataUrl);
+        
+        // Se a API Key do ImgBB estiver disponível, faz o upload em background
+        if (masterContactSettings && masterContactSettings.imgbbApiKey) {
+          uploadImageToImgBB(compressedDataUrl, rowId);
+        }
       }
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+// Upload assíncrono de Base64 para o ImgBB
+async function uploadImageToImgBB(base64Data, rowId) {
+  if (!masterContactSettings || !masterContactSettings.imgbbApiKey) {
+    return;
+  }
+
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  const btn = row.querySelector(".btn-expense-photo");
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 16px; height: 16px; color: var(--secondary);"></i>`;
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+    btn.disabled = true;
+  }
+
+  try {
+    const cleanBase64 = base64Data.split(",")[1] || base64Data;
+    
+    const formData = new FormData();
+    formData.append("image", cleanBase64);
+
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${masterContactSettings.imgbbApiKey}`, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.data && data.data.url) {
+      const publicUrl = data.data.url;
+      row.dataset.photo = publicUrl;
+      updateExpenseRowPhotoUI(rowId, publicUrl);
+      console.log("Upload ImgBB concluído com sucesso:", publicUrl);
+    } else {
+      throw new Error(data.error?.message || "Erro na resposta do ImgBB");
+    }
+  } catch (error) {
+    console.error("Falha no upload para o ImgBB:", error);
+    // Caso falhe, restaura o Base64 local para manter a foto
+    row.dataset.photo = base64Data;
+    updateExpenseRowPhotoUI(rowId, base64Data);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function updateExpenseRowPhotoUI(rowId, dataUrl) {
@@ -2408,7 +2463,11 @@ function getFormattedWhatsAppText(day) {
   let hasExpenses = false;
   day.expenses.forEach(e => {
     if (e.category !== "vales") {
-      text += `  • ${e.description}: ${formatCurrency(e.value)}\n`;
+      let expenseText = `  • ${e.description}: ${formatCurrency(e.value)}`;
+      if (e.photo) {
+        expenseText += ` (📑 Nota: ${e.photo})`;
+      }
+      text += expenseText + `\n`;
       hasExpenses = true;
     }
   });
@@ -4836,17 +4895,19 @@ async function saveMasterContactSettings(e) {
   const emailEl = document.getElementById("master-email-grid") || document.getElementById("master-email");
   const phoneEl = document.getElementById("master-phone-grid") || document.getElementById("master-phone");
   const pixEl = document.getElementById("master-pix-key-grid") || document.getElementById("master-pix-key");
+  const imgbbEl = document.getElementById("master-imgbb-api-key-grid");
 
   const email = emailEl ? emailEl.value.trim() : "";
   const phone = phoneEl ? phoneEl.value.trim() : "";
   const pixKey = pixEl ? pixEl.value.trim() : "";
+  const imgbbApiKey = imgbbEl ? imgbbEl.value.trim() : "";
 
   if (!email || !phone || !pixKey) {
-    alert("Preencha todos os campos antes de salvar.");
+    alert("Preencha todos os campos obrigatórios (E-mail, WhatsApp e Chave Pix) antes de salvar.");
     return;
   }
 
-  const contactData = { email, phone, pixKey, updatedAt: new Date().toISOString() };
+  const contactData = { email, phone, pixKey, imgbbApiKey, updatedAt: new Date().toISOString() };
 
   try {
     await fetch(UPSTASH_URL, {
@@ -4855,6 +4916,8 @@ async function saveMasterContactSettings(e) {
       body: JSON.stringify(["SET", "master_contact_settings", JSON.stringify(contactData)])
     });
     alert("Configurações de contato salvas com sucesso!");
+    // Atualiza na memória RAM
+    masterContactSettings = contactData;
   } catch (err) {
     console.error("Erro ao salvar configurações de contato:", err);
     alert("Erro ao salvar. Tente novamente.");
@@ -4876,10 +4939,12 @@ async function loadMasterContactSettingsGrid() {
       const emailEl = document.getElementById("master-email-grid");
       const phoneEl = document.getElementById("master-phone-grid");
       const pixEl = document.getElementById("master-pix-key-grid");
+      const imgbbEl = document.getElementById("master-imgbb-api-key-grid");
 
       if (emailEl) emailEl.value = contact.email || "";
       if (phoneEl) phoneEl.value = contact.phone || "";
       if (pixEl) pixEl.value = contact.pixKey || "";
+      if (imgbbEl) imgbbEl.value = contact.imgbbApiKey || "";
     }
   } catch (err) {
     console.warn("Erro ao carregar configurações de contato:", err);
@@ -4902,6 +4967,7 @@ async function loadUserContactInfo() {
 
     if (data.result) {
       const contact = JSON.parse(data.result);
+      masterContactSettings = contact; // Guardamos globalmente para uploads das notas
       pixKey = contact.pixKey || "lucas_simoes_araujo@hotmail.com";
       
       if (emailSpan) emailSpan.textContent = contact.email || "Não configurado";
