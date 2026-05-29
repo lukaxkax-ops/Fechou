@@ -1,12 +1,12 @@
 // =====================================================================
 // Banco de Dados em Nuvem - Upstash Redis REST API
 // CORS nativo comprovado no browser, dados via body JSON, sem limite de URL.
-// UUID fixo: db3fb69b-a116-41c2-bcb7-29760478a473
-// Para renovar/recriar: POST https://upstash.com/start-redis com Idempotency-Key: db3fb69b-a116-41c2-bcb7-29760478a473
-// Para tornar permanente: https://upstash.com/start-redis/console/db3fb69b-a116-41c2-bcb7-29760478a473
+// UUID fixo: 9e6587c6-de84-4e20-9492-96576b8a8cd4
+// Para renovar/recriar: POST https://upstash.com/start-redis com Idempotency-Key: 9e6587c6-de84-4e20-9492-96576b8a8cd4
+// Para tornar permanente: https://upstash.com/start-redis/console/9e6587c6-de84-4e20-9492-96576b8a8cd4
 // =====================================================================
-const UPSTASH_URL = "https://mint-rabbit-136967.upstash.io";
-const UPSTASH_TOKEN = "gQAAAAAAAhcHAQIgcDEzYzgyMWQxOGQ1NGI0MGFlOGUwZmVlNDAyM2VjOGE0Ng";
+const UPSTASH_URL = "https://amused-guinea-139283.upstash.io";
+const UPSTASH_TOKEN = "gQAAAAAAAiATAQIgcDFmOWFiMTQyYzFiZWU0MDExYWRjYWJlMTEwMTM1OTVjMA";
 
 // Chave Pix do Administrador Mestre para Recebimento de Créditos (Configurável)
 const PIX_KEY = "70df014b-dec7-412a-9920-743e2687e3fb";
@@ -120,6 +120,8 @@ let auditedUser = null;
 let isLicenseExpired = false;
 let deferredPrompt = null;
 let masterContactSettings = null;
+let notesPhotoUrl = "";
+let editNotesPhotoUrl = "";
 
 function getSubscriptionAmount() {
   return (masterContactSettings && masterContactSettings.subscriptionAmount !== undefined) 
@@ -1455,7 +1457,7 @@ function previewExpensePhoto(rowId) {
     previewModal.innerHTML = `
       <div class="modal-box" style="max-width: 600px; padding: 20px;">
         <div class="modal-header">
-          <h3>Comprovante da Despesa</h3>
+          <h3 id="photo-preview-title">Comprovante da Despesa</h3>
           <span class="modal-close" onclick="closeModal('modal-photo-preview')">&times;</span>
         </div>
         <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px 0;">
@@ -1468,6 +1470,17 @@ function previewExpensePhoto(rowId) {
       </div>
     `;
     document.body.appendChild(previewModal);
+  }
+
+  const titleEl = previewModal.querySelector("#photo-preview-title");
+  if (titleEl) {
+    if (rowId.includes("bank-inflow")) {
+      titleEl.textContent = "Comprovante Bancário (Entrada)";
+    } else if (rowId.includes("bank-outflow")) {
+      titleEl.textContent = "Comprovante Bancário (Saída)";
+    } else {
+      titleEl.textContent = "Comprovante da Despesa";
+    }
   }
 
   const img = previewModal.querySelector("#photo-preview-img");
@@ -1505,6 +1518,326 @@ function previewDirectPhoto(dataUrl) {
   }
   previewModal.querySelector("#photo-direct-preview-img").src = dataUrl;
   openModal("modal-photo-direct-preview");
+}
+
+// --- FOTOS NAS OBSERVAÇÕES DO FECHAMENTO DE CAIXA ---
+function triggerNotesPhotoUpload() {
+  if (notesPhotoUrl) {
+    previewNotesPhoto("new");
+  } else {
+    const fileInput = document.getElementById("notes-photo-input");
+    if (fileInput) fileInput.click();
+  }
+}
+
+function triggerEditNotesPhotoUpload() {
+  if (editNotesPhotoUrl) {
+    previewNotesPhoto("edit");
+  } else {
+    const fileInput = document.getElementById("edit-notes-photo-input");
+    if (fileInput) fileInput.click();
+  }
+}
+
+function handleNotesPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const btn = document.getElementById("btn-notes-photo");
+  const label = document.getElementById("notes-photo-label");
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 14px; height: 14px; color: var(--secondary);"></i>`;
+    if (label) label.textContent = "Processando imagem...";
+    if (window.lucide) window.lucide.createIcons();
+    btn.disabled = true;
+  }
+
+  function uploadFileDirect(fileToUpload) {
+    const directReader = new FileReader();
+    directReader.onload = function(ev) {
+      const dataUrl = ev.target.result;
+      notesPhotoUrl = dataUrl;
+      updateNotesPhotoUI("new", dataUrl);
+      uploadNotesImageToImgBB(dataUrl, "new");
+    };
+    directReader.onerror = function() {
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="camera" style="width: 14px; height: 14px;"></i>`;
+        if (label) label.textContent = "Anexar Foto das Observações";
+        btn.disabled = false;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    };
+    directReader.readAsDataURL(fileToUpload);
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    let canvasProcessed = false;
+
+    img.onload = function() {
+      canvasProcessed = true;
+      try {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const MAX_SIZE = 800;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+        notesPhotoUrl = compressedDataUrl;
+        updateNotesPhotoUI("new", compressedDataUrl);
+        uploadNotesImageToImgBB(compressedDataUrl, "new");
+      } catch (canvasErr) {
+        console.warn("Canvas falhou nas observações, usando arquivo direto:", canvasErr);
+        uploadFileDirect(file);
+      }
+    };
+
+    img.onerror = function() {
+      uploadFileDirect(file);
+    };
+
+    img.src = e.target.result;
+
+    setTimeout(function() {
+      if (!canvasProcessed) {
+        uploadFileDirect(file);
+      }
+    }, 5000);
+  };
+  reader.onerror = function() {
+    uploadFileDirect(file);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleEditNotesPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const btn = document.getElementById("btn-edit-notes-photo");
+  const label = document.getElementById("edit-notes-photo-label");
+  if (btn) {
+    btn.innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 14px; height: 14px; color: var(--secondary);"></i>`;
+    if (label) label.textContent = "Processando imagem...";
+    if (window.lucide) window.lucide.createIcons();
+    btn.disabled = true;
+  }
+
+  function uploadFileDirect(fileToUpload) {
+    const directReader = new FileReader();
+    directReader.onload = function(ev) {
+      const dataUrl = ev.target.result;
+      editNotesPhotoUrl = dataUrl;
+      updateNotesPhotoUI("edit", dataUrl);
+      uploadNotesImageToImgBB(dataUrl, "edit");
+    };
+    directReader.onerror = function() {
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="camera" style="width: 14px; height: 14px;"></i>`;
+        if (label) label.textContent = "Anexar Foto das Observações";
+        btn.disabled = false;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    };
+    directReader.readAsDataURL(fileToUpload);
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    let canvasProcessed = false;
+
+    img.onload = function() {
+      canvasProcessed = true;
+      try {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        const MAX_SIZE = 800;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+        editNotesPhotoUrl = compressedDataUrl;
+        updateNotesPhotoUI("edit", compressedDataUrl);
+        uploadNotesImageToImgBB(compressedDataUrl, "edit");
+      } catch (canvasErr) {
+        console.warn("Canvas falhou na edição de observações, usando arquivo direto:", canvasErr);
+        uploadFileDirect(file);
+      }
+    };
+
+    img.onerror = function() {
+      uploadFileDirect(file);
+    };
+
+    img.src = e.target.result;
+
+    setTimeout(function() {
+      if (!canvasProcessed) {
+        uploadFileDirect(file);
+      }
+    }, 5000);
+  };
+  reader.onerror = function() {
+    uploadFileDirect(file);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadNotesImageToImgBB(base64Data, type) {
+  const btnId = type === "new" ? "btn-notes-photo" : "btn-edit-notes-photo";
+  const btn = document.getElementById(btnId);
+
+  try {
+    let apiKey = "";
+    if (masterContactSettings && masterContactSettings.imgbbApiKey) {
+      const trimmedKey = masterContactSettings.imgbbApiKey.trim();
+      if (/^[a-fA-F0-9]{32}$/.test(trimmedKey)) {
+        apiKey = trimmedKey;
+      }
+    }
+
+    if (!apiKey) {
+      throw new Error("Chave API ImgBB ausente ou inválida.");
+    }
+
+    const cleanBase64 = base64Data.split(",")[1] || base64Data;
+    const formData = new FormData();
+    formData.append("image", cleanBase64);
+
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success && data.data && data.data.url) {
+      const publicUrl = data.data.url;
+      if (type === "new") {
+        notesPhotoUrl = publicUrl;
+      } else {
+        editNotesPhotoUrl = publicUrl;
+      }
+      updateNotesPhotoUI(type, publicUrl);
+    } else {
+      throw new Error(data.error?.message || "Erro ImgBB");
+    }
+  } catch (error) {
+    console.error("Falha no upload da foto das observações:", error);
+    // Mantém local
+    if (type === "new") {
+      notesPhotoUrl = base64Data;
+    } else {
+      editNotesPhotoUrl = base64Data;
+    }
+    updateNotesPhotoUI(type, base64Data);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function updateNotesPhotoUI(type, dataUrl) {
+  const btnId = type === "new" ? "btn-notes-photo" : "btn-edit-notes-photo";
+  const labelId = type === "new" ? "notes-photo-label" : "edit-notes-photo-label";
+  const btn = document.getElementById(btnId);
+  const label = document.getElementById(labelId);
+  if (!btn) return;
+
+  if (dataUrl) {
+    btn.innerHTML = `<img src="${dataUrl}" style="width: 24px; height: 24px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-glass); margin-right: 4px;">`;
+    if (label) label.textContent = "Visualizar / Alterar Foto";
+    btn.title = "Visualizar ou Alterar Foto das Observações";
+  } else {
+    btn.innerHTML = `<i data-lucide="camera" style="width: 14px; height: 14px;"></i>`;
+    if (label) label.textContent = "Anexar Foto das Observações";
+    btn.title = "Anexar Foto / Comprovante das Observações";
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+function previewNotesPhoto(type) {
+  const currentPhoto = type === "new" ? notesPhotoUrl : editNotesPhotoUrl;
+  if (!currentPhoto) return;
+
+  let previewModal = document.getElementById("modal-photo-preview");
+  if (!previewModal) {
+    previewModal = document.createElement("div");
+    previewModal.id = "modal-photo-preview";
+    previewModal.className = "modal-overlay";
+    previewModal.style.zIndex = "999999";
+    previewModal.innerHTML = `
+      <div class="modal-box" style="max-width: 600px; padding: 20px;">
+        <div class="modal-header">
+          <h3 id="photo-preview-title">Comprovante</h3>
+          <span class="modal-close" onclick="closeModal('modal-photo-preview')">&times;</span>
+        </div>
+        <div class="modal-body" style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 10px 0;">
+          <img id="photo-preview-img" style="max-width: 100%; max-height: 70vh; border-radius: var(--radius-md); box-shadow: var(--shadow-premium);">
+          <div style="display: flex; gap: 8px; width: 100%;">
+            <button class="btn btn-secondary" onclick="closeModal('modal-photo-preview')" style="flex: 1;">Fechar</button>
+            <button class="btn btn-danger" id="btn-delete-photo-preview" style="flex: 1;">Remover Foto</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(previewModal);
+  }
+
+  const titleEl = previewModal.querySelector("#photo-preview-title");
+  if (titleEl) titleEl.textContent = "Foto das Observações";
+
+  const img = previewModal.querySelector("#photo-preview-img");
+  img.src = currentPhoto;
+
+  const deleteBtn = previewModal.querySelector("#btn-delete-photo-preview");
+  deleteBtn.onclick = function() {
+    if (type === "new") {
+      notesPhotoUrl = "";
+      updateNotesPhotoUI("new", "");
+    } else {
+      editNotesPhotoUrl = "";
+      updateNotesPhotoUI("edit", "");
+    }
+    closeModal("modal-photo-preview");
+  };
+
+  openModal("modal-photo-preview");
 }
 
 function removeExpenseRow(rowId) {
@@ -1783,7 +2116,8 @@ async function saveClosing(event) {
     operatorName: operatorNameInput,
     revenues: revenues,
     expenses: expenses,
-    notes: notes
+    notes: notes,
+    notesPhoto: notesPhotoUrl || ""
   };
 
   // Grava de forma assíncrona no Upstash/RAM
@@ -1831,6 +2165,10 @@ function resetForm() {
   const valesContainer = document.getElementById("vales-list-container");
   valesContainer.innerHTML = "";
   addValeRow();
+
+  // Limpa a foto das observações
+  notesPhotoUrl = "";
+  updateNotesPhotoUI("new", "");
 
   // Atualiza painel do formulário zerado
   updateLiveDashboard();
@@ -2170,6 +2508,10 @@ async function editClosing(dateStr, shiftStr = "dia") {
   document.getElementById("edit-operator-name").value = day.operatorName || "";
   document.getElementById("edit-closing-notes").value = day.notes || "";
 
+  // Carrega foto das observações na edição
+  editNotesPhotoUrl = day.notesPhoto || "";
+  updateNotesPhotoUI("edit", editNotesPhotoUrl);
+
   // Constrói o formulário de edição semelhante ao original
   const editContainer = document.getElementById("modal-edit-form-content");
   
@@ -2362,7 +2704,8 @@ async function saveEditClosing(event) {
     operatorName: operatorName,
     revenues: revenues,
     expenses: expenses,
-    notes: notes
+    notes: notes,
+    notesPhoto: editNotesPhotoUrl || ""
   };
 
   // Salva no banco de dados Upstash/RAM passando o originalShift para a correta substituição
@@ -2648,6 +2991,14 @@ function getFormattedWhatsAppText(day) {
 
   if (day.notes) {
     text += `📝 *Observações:* \n_${day.notes}_\n`;
+  }
+  
+  if (day.notesPhoto) {
+    if (day.notesPhoto.startsWith("http")) {
+      text += `🖼️ *Foto das Observações:* ${day.notesPhoto}\n`;
+    } else {
+      text += `🖼️ *Foto das Observações:* Anexo Local\n`;
+    }
   }
   
   return text;
@@ -3331,13 +3682,13 @@ function switchTodaySubTab(tab) {
 }
 
 // Builders dinâmicos de Entradas Bancárias
-function addBankInflowRow(description = "", value = "", category = "pix", containerId = "bank-inflows-container") {
+function addBankInflowRow(description = "", value = "", category = "pix", containerId = "bank-inflows-container", photo = "") {
   const container = document.getElementById(containerId);
   if (!container) return;
   const rowId = `bank-inflow-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const row = document.createElement("div");
-  row.className = "expense-row";
+  row.className = "expense-row bank-row";
   row.id = rowId;
 
   row.innerHTML = `
@@ -3361,24 +3712,31 @@ function addBankInflowRow(description = "", value = "", category = "pix", contai
         <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
       </select>
     </div>
-    <button type="button" class="btn-icon-danger" onclick="removeBankRow('${rowId}')" title="Excluir entrada" style="margin-top: 18px;">
-      <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-    </button>
+    <div class="expense-actions-stack" style="display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 42px; margin-bottom: 0;">
+      <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Comprovante" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
+        <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+      </button>
+      <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
+      <button type="button" class="btn-icon-danger" onclick="removeBankRow('${rowId}')" title="Excluir entrada" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
   `;
 
   container.appendChild(row);
+  if (photo) updateExpenseRowPhotoUI(rowId, photo);
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
 }
 
 // Builders dinâmicos de Saídas Bancárias
-function addBankOutflowRow(description = "", value = "", category = "fornecedores", containerId = "bank-outflows-container") {
+function addBankOutflowRow(description = "", value = "", category = "fornecedores", containerId = "bank-outflows-container", photo = "") {
   const container = document.getElementById(containerId);
   if (!container) return;
   const rowId = `bank-outflow-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const row = document.createElement("div");
-  row.className = "expense-row";
+  row.className = "expense-row bank-row";
   row.id = rowId;
 
   row.innerHTML = `
@@ -3403,12 +3761,19 @@ function addBankOutflowRow(description = "", value = "", category = "fornecedore
         <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
       </select>
     </div>
-    <button type="button" class="btn-icon-danger" onclick="removeBankRow('${rowId}')" title="Excluir saída" style="margin-top: 18px;">
-      <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-    </button>
+    <div class="expense-actions-stack" style="display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 42px; margin-bottom: 0;">
+      <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Comprovante" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
+        <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+      </button>
+      <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
+      <button type="button" class="btn-icon-danger" onclick="removeBankRow('${rowId}')" title="Excluir saída" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
   `;
 
   container.appendChild(row);
+  if (photo) updateExpenseRowPhotoUI(rowId, photo);
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
 }
@@ -3506,7 +3871,7 @@ async function saveBankClosing(event) {
     const cat = row.querySelector(".bank-inflow-cat").value;
 
     if (desc && val > 0) {
-      inflows.push({ description: desc, value: val, category: cat });
+      inflows.push({ description: desc, value: val, category: cat, photo: row.dataset.photo || "" });
     }
   });
 
@@ -3518,7 +3883,7 @@ async function saveBankClosing(event) {
     const cat = row.querySelector(".bank-outflow-cat").value;
 
     if (desc && val > 0) {
-      outflows.push({ description: desc, value: val, category: cat });
+      outflows.push({ description: desc, value: val, category: cat, photo: row.dataset.photo || "" });
     }
   });
 
@@ -3708,7 +4073,15 @@ function getFormattedBankWhatsAppText(day) {
   text += `📥 *SOMA DAS ENTRADAS: ${formatCurrency(totalInflows)}*\n`;
   if (day.inflows.length > 0) {
     day.inflows.forEach(i => {
-      text += `  • ${i.description} (${BANK_INFLOW_CATEGORIES[i.category] || i.category}): ${formatCurrency(i.value)}\n`;
+      let itemText = `  • ${i.description} (${BANK_INFLOW_CATEGORIES[i.category] || i.category}): ${formatCurrency(i.value)}`;
+      if (i.photo) {
+        if (i.photo.startsWith("http")) {
+          itemText += ` (📑 Nota: ${i.photo})`;
+        } else {
+          itemText += ` (📑 Nota: Anexo Local)`;
+        }
+      }
+      text += itemText + `\n`;
     });
   } else {
     text += `  • Nenhuma entrada registrada.\n`;
@@ -3718,7 +4091,15 @@ function getFormattedBankWhatsAppText(day) {
   text += `📤 *SOMA DAS SAÍDAS: ${formatCurrency(totalOutflows)}*\n`;
   if (day.outflows.length > 0) {
     day.outflows.forEach(o => {
-      text += `  • ${o.description} (${BANK_OUTFLOW_CATEGORIES[o.category] || o.category}): ${formatCurrency(o.value)}\n`;
+      let itemText = `  • ${o.description} (${BANK_OUTFLOW_CATEGORIES[o.category] || o.category}): ${formatCurrency(o.value)}`;
+      if (o.photo) {
+        if (o.photo.startsWith("http")) {
+          itemText += ` (📑 Nota: ${o.photo})`;
+        } else {
+          itemText += ` (📑 Nota: Anexo Local)`;
+        }
+      }
+      text += itemText + `\n`;
     });
   } else {
     text += `  • Nenhuma saída registrada.\n`;
@@ -3927,7 +4308,7 @@ async function editBankClosing(dateStr, shiftStr = "dia") {
   let hasInflows = false;
   if (day.inflows && day.inflows.length > 0) {
     day.inflows.forEach(i => {
-      addBankInflowRow(i.description, i.value, i.category, "edit-bank-inflows-container");
+      addBankInflowRow(i.description, i.value, i.category, "edit-bank-inflows-container", i.photo || "");
       hasInflows = true;
     });
   }
@@ -3938,7 +4319,7 @@ async function editBankClosing(dateStr, shiftStr = "dia") {
   let hasOutflows = false;
   if (day.outflows && day.outflows.length > 0) {
     day.outflows.forEach(o => {
-      addBankOutflowRow(o.description, o.value, o.category, "edit-bank-outflows-container");
+      addBankOutflowRow(o.description, o.value, o.category, "edit-bank-outflows-container", o.photo || "");
       hasOutflows = true;
     });
   }
@@ -3989,7 +4370,7 @@ async function saveEditBankClosing(event) {
     const cat = row.querySelector(".bank-inflow-cat").value;
 
     if (desc && val > 0) {
-      inflows.push({ description: desc, value: val, category: cat });
+      inflows.push({ description: desc, value: val, category: cat, photo: row.dataset.photo || "" });
     }
   });
 
@@ -4001,7 +4382,7 @@ async function saveEditBankClosing(event) {
     const cat = row.querySelector(".bank-outflow-cat").value;
 
     if (desc && val > 0) {
-      outflows.push({ description: desc, value: val, category: cat });
+      outflows.push({ description: desc, value: val, category: cat, photo: row.dataset.photo || "" });
     }
   });
 

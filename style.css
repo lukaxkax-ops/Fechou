@@ -578,6 +578,10 @@ header {
   animation: slideIn 0.2s ease-out;
 }
 
+.expense-row.bank-row {
+  grid-template-columns: 1fr 120px 140px 42px;
+}
+
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -1190,6 +1194,28 @@ header {
   .expense-row button,
   .expense-row .btn-icon-danger {
     grid-column: span 1 !important; /* Botão excluir / Ações na direita na segunda linha */
+    align-self: flex-end !important;
+  }
+
+  /* Empilhamento de 4 colunas para Linhas Bancárias no Mobile */
+  .expense-row.bank-row {
+    grid-template-columns: 1fr 120px auto !important;
+  }
+  
+  .expense-row.bank-row .input-container:nth-child(1) {
+    grid-column: span 3 !important; /* Descrição ocupa a linha inteira */
+  }
+  
+  .expense-row.bank-row .input-container:nth-child(2) {
+    grid-column: span 1 !important; /* Valor */
+  }
+  
+  .expense-row.bank-row .input-container:nth-child(3) {
+    grid-column: span 1 !important; /* Categoria */
+  }
+  
+  .expense-row.bank-row .expense-actions-stack {
+    grid-column: span 1 !important; /* Ações stack */
     align-self: flex-end !important;
   }
 }
