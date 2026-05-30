@@ -3509,6 +3509,12 @@ async function adminInspectUser(username) {
 
   // Inicializa o app com a sessão do operador sob inspeção
   initApp();
+
+  // Força a ativação da aba de Fechamento de Caixa do operador comum
+  const firstTab = document.querySelector('.main-grid .sidebar .nav-item[data-target="panel-today"]');
+  if (firstTab) {
+    switchTab(firstTab);
+  }
 }
 
 // Sair do modo auditoria e retornar ao painel mestre
@@ -5715,7 +5721,7 @@ function generatePixPayload(key, amount, merchantName, merchantCity) {
 
 // Abre o menu lateral retrátil no mobile
 function openSidebarMenu() {
-  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre");
+  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre" && !isAuditMode);
   const sidebarId = isMestre ? "master-sidebar" : "app-sidebar";
   const overlayId = isMestre ? "master-sidebar-overlay" : "sidebar-overlay";
   const sidebar = document.getElementById(sidebarId);
@@ -5729,7 +5735,7 @@ function openSidebarMenu() {
 
 // Fecha o menu lateral retrátil no mobile
 function closeSidebarMenu() {
-  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre");
+  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre" && !isAuditMode);
   const sidebarId = isMestre ? "master-sidebar" : "app-sidebar";
   const overlayId = isMestre ? "master-sidebar-overlay" : "sidebar-overlay";
   const sidebar = document.getElementById(sidebarId);
@@ -5759,7 +5765,7 @@ document.addEventListener('touchend', e => {
 }, { passive: true });
 
 function handleSwipeGesture() {
-  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre");
+  const isMestre = (sessionStorage.getItem("gastrofecho_logged_user") === "mestre" && !isAuditMode);
   const sidebarId = isMestre ? "master-sidebar" : "app-sidebar";
   const sidebar = document.getElementById(sidebarId);
   const isMobile = window.innerWidth <= 1024;
