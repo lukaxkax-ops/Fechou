@@ -1,12 +1,12 @@
 // =====================================================================
 // Banco de Dados em Nuvem - Upstash Redis REST API
 // CORS nativo comprovado no browser, dados via body JSON, sem limite de URL.
-// UUID fixo: 9e6587c6-de84-4e20-9492-96576b8a8cd4
-// Para renovar/recriar: POST https://upstash.com/start-redis com Idempotency-Key: 9e6587c6-de84-4e20-9492-96576b8a8cd4
-// Para tornar permanente: https://upstash.com/start-redis/console/9e6587c6-de84-4e20-9492-96576b8a8cd4
+// UUID fixo: 772e0cd0-932d-4692-8cc8-77d8180dfa48
+// Para renovar/recriar: POST https://upstash.com/start-redis com Idempotency-Key: 772e0cd0-932d-4692-8cc8-77d8180dfa48
+// Para tornar permanente: https://upstash.com/start-redis/console/772e0cd0-932d-4692-8cc8-77d8180dfa48
 // =====================================================================
-const UPSTASH_URL = "https://amused-guinea-139283.upstash.io";
-const UPSTASH_TOKEN = "gQAAAAAAAiATAQIgcDFmOWFiMTQyYzFiZWU0MDExYWRjYWJlMTEwMTM1OTVjMA";
+const UPSTASH_URL = "https://valid-rooster-88690.upstash.io";
+const UPSTASH_TOKEN = "gQAAAAAAAVpyAQIgcDEzN2FjY2JlMDFiMDI0ZGY1ODA3MzlmMjFhYTVlZGJiYQ";
 
 // Chave Pix do Administrador Mestre para Recebimento de Créditos (Configurável)
 const PIX_KEY = "70df014b-dec7-412a-9920-743e2687e3fb";
