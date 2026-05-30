@@ -5584,11 +5584,20 @@ async function loadUserContactInfo() {
       pixKey = contact.pixKey || "lucas_simoes_araujo@hotmail.com";
       subAmount = contact.subscriptionAmount !== undefined ? parseFloat(contact.subscriptionAmount) : 49.90;
       
-      if (emailSpan) emailSpan.textContent = contact.email || "Não configurado";
+      if (emailSpan) {
+        if (contact.email) {
+          emailSpan.innerHTML = '<a href="mailto:' + contact.email + '" style="color: var(--primary); text-decoration: underline;">' + contact.email + '</a>';
+        } else {
+          emailSpan.textContent = "Não configurado";
+        }
+      }
       if (whatsappSpan) {
-        const phoneNumber = (contact.phone || "").replace(/\D/g, "");
+        let phoneNumber = (contact.phone || "").replace(/\D/g, "");
         if (phoneNumber) {
-          whatsappSpan.innerHTML = '<a href="https://wa.me/55' + phoneNumber + '" target="_blank" style="color: var(--color-revenue); text-decoration: underline;">' + contact.phone + '</a>';
+          if (phoneNumber.length <= 11) {
+            phoneNumber = "55" + phoneNumber;
+          }
+          whatsappSpan.innerHTML = '<a href="https://wa.me/' + phoneNumber + '" target="_blank" style="color: var(--color-revenue); text-decoration: underline;">' + contact.phone + '</a>';
         } else {
           whatsappSpan.textContent = "Não configurado";
         }
