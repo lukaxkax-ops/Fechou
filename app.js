@@ -452,8 +452,8 @@ function initApp() {
   // Limpa e Inicializa a primeira linha de vale e despesa para encorajar a entrada
   document.getElementById("vales-list-container").innerHTML = "";
   document.getElementById("expense-list-container").innerHTML = "";
-  addValeRow();
-  addGeneralExpenseRow();
+  addValeRow("", "", "folha", "vales-list-container", true);
+  addGeneralExpenseRow("", "", "alimentos", "expense-list-container", "", "", true);
 
   // Inicialização do Formulário Bancário
   const bankClosingDate = document.getElementById("bank-closing-date");
@@ -1151,11 +1151,11 @@ function formatCurrency(value) {
 }
 
 // --- CONTROLE DE DESPESAS DINÂMICAS ---
-function addValeRow(employeeName = "", value = "", category = "folha", containerId = "vales-list-container") {
+function addValeRow(employeeName = "", value = "", category = "folha", containerId = "vales-list-container", isInitial = false) {
   const container = document.getElementById(containerId);
   
   // Validação: não permitir adicionar manualmente se já houver algum vale ou despesa não confirmado no mesmo escopo
-  if (!employeeName && !value) {
+  if (!isInitial && !employeeName && !value) {
     const scopeContainerIds = containerId.startsWith("edit-") 
       ? ["edit-vales-list-container", "edit-expense-list-container"] 
       : ["vales-list-container", "expense-list-container"];
@@ -1225,11 +1225,11 @@ function addValeRow(employeeName = "", value = "", category = "folha", container
   }
 }
 
-function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "", observation = "") {
+function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "", observation = "", isInitial = false) {
   const container = document.getElementById(containerId);
   
   // Validação: não permitir adicionar manualmente se já houver algum vale ou despesa não confirmado no mesmo escopo
-  if (!description && !value) {
+  if (!isInitial && !description && !value) {
     const scopeContainerIds = containerId.startsWith("edit-") 
       ? ["edit-vales-list-container", "edit-expense-list-container"] 
       : ["vales-list-container", "expense-list-container"];
@@ -2330,12 +2330,12 @@ function resetForm() {
   // Limpa as despesas gerais e cria uma em branco
   const container = document.getElementById("expense-list-container");
   container.innerHTML = "";
-  addGeneralExpenseRow();
+  addGeneralExpenseRow("", "", "alimentos", "expense-list-container", "", "", true);
 
   // Limpa os vales de funcionários e cria um em branco
   const valesContainer = document.getElementById("vales-list-container");
   valesContainer.innerHTML = "";
-  addValeRow();
+  addValeRow("", "", "folha", "vales-list-container", true);
 
   // Limpa a foto das observações
   notesPhotoUrl = "";
@@ -2780,10 +2780,10 @@ async function editClosing(dateStr, shiftStr = "dia") {
 
   // Preenche pelo menos um vazio se não houver registros
   if (!hasVales) {
-    addValeRow("", "", "folha", "edit-vales-list-container");
+    addValeRow("", "", "folha", "edit-vales-list-container", true);
   }
   if (!hasExpenses) {
-    addGeneralExpenseRow("", "", "alimentos", "edit-expense-list-container");
+    addGeneralExpenseRow("", "", "alimentos", "edit-expense-list-container", "", "", true);
   }
 
   openModal("modal-edit");
