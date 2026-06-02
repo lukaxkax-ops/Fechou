@@ -1676,6 +1676,13 @@ body.dark-theme .form-section-card:hover {
     margin-bottom: 16px !important;
   }
 
+  #bank-history-table {
+    display: none !important;
+  }
+  #bank-history-mobile-cards {
+    display: block !important;
+  }
+
   /* 1. Layout de Grid Amplo para Vales no Mobile (Expandido) */
   .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) {
     display: grid !important;
