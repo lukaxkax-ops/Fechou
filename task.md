@@ -1,4 +1,4 @@
-# Checklist de Implementação - Turno Madrugada, Confirmação, Botão OK & Correções
+# Checklist de Implementação - Turno Madrugada, Confirmação, Botão OK & Otimizações Mobile
 
 - [x] Adicionar o turno "Madrugada" nos dropdowns de seleção (`index.html`)
   - [x] Lançamento de Caixa Principal (`#closing-shift`)
@@ -21,13 +21,17 @@
   - [x] Inserir o texto "OK" ao lado do ícone de check em `addValeRow` e `addGeneralExpenseRow`
   - [x] Manter o comportamento do texto "OK" ao re-expandir e alternar o estado do botão
   - [x] Ajustar larguras das colunas de ações no desktop em `style.css` (de 80px/110px para 100px/140px)
-- [x] **Correções de Inicialização e Alertas no Login**
+- [x] Correções de Inicialização e Alertas no Login
   - [x] Adicionar parâmetro `isInitial` para ignorar verificação em linhas geradas automaticamente no carregamento inicial
   - [x] Passar `isInitial = true` no `initApp()`, `resetForm()` e carregamento de modais vazios para evitar alertas na tela de login
   - [x] Corrigir a inicialização de despesas gerais e vales que estavam sumindo por interrupção do alert no boot do app
+- [x] **Otimizações Responsivas Mobile Adicionais**
+  - [x] Ocultar a tabela de histórico bancário (`#bank-history-table`) em smartphones
+  - [x] Exibir os cards de histórico bancário (`#bank-history-mobile-cards`) responsivos no mobile usando `display: block !important`
+  - [x] Solucionar a colisão de rótulos automáticos de pseudo-elementos que causavam textos incorretos no mobile
 - [x] Controle de cache e versionamento (Cache-Busting)
-  - [x] Incrementar versão do script (`app.js?v=27.0`) e estilo (`style.css?v=19.0`) em `index.html`
-  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v43`
+  - [x] Incrementar versão do script (`app.js?v=27.0`) e estilo (`style.css?v=20.0`) em `index.html`
+  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v44`
 - [x] Deployment e Sincronização
   - [x] Copiar novos arquivos para o repositório de produção `fechou-deploy`
   - [x] Stager, commiter e dar push nos dois repositórios (dev e prod)
