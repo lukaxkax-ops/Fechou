@@ -1676,22 +1676,22 @@ body.dark-theme .form-section-card:hover {
     width: 100% !important;
   }
   /* Nome do funcionário em largura total */
-  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container:nth-of-type(1) {
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > :nth-child(2) {
     grid-row: 1;
     grid-column: span 2 !important;
   }
   /* Categoria (50% de largura) */
-  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container:nth-of-type(2) {
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > :nth-child(3) {
     grid-row: 2;
     grid-column: span 1 !important;
   }
   /* Valor do Vale (50% de largura) */
-  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container:nth-of-type(3) {
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > :nth-child(4) {
     grid-row: 2;
     grid-column: span 1 !important;
   }
   /* Ações na parte inferior */
-  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .expense-actions-stack {
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > :nth-child(5) {
     grid-row: 3;
     grid-column: span 2 !important;
     display: flex !important;
@@ -1721,27 +1721,27 @@ body.dark-theme .form-section-card:hover {
     width: 100% !important;
   }
   /* Descrição em largura total */
-  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(1) {
+  .expense-row.general-expense-row:not(.minimized) > :nth-child(2) {
     grid-row: 1;
     grid-column: span 2 !important;
   }
   /* Categoria (50% de largura) */
-  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(2) {
+  .expense-row.general-expense-row:not(.minimized) > :nth-child(3) {
     grid-row: 2;
     grid-column: span 1 !important;
   }
   /* Valor (50% de largura) */
-  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(4) {
+  .expense-row.general-expense-row:not(.minimized) > :nth-child(5) {
     grid-row: 2;
     grid-column: span 1 !important;
   }
   /* Observação em largura total */
-  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(3) {
+  .expense-row.general-expense-row:not(.minimized) > :nth-child(4) {
     grid-row: 3;
     grid-column: span 2 !important;
   }
   /* Ações na parte inferior */
-  .expense-row.general-expense-row:not(.minimized) > .expense-actions-stack {
+  .expense-row.general-expense-row:not(.minimized) > :nth-child(6) {
     grid-row: 4;
     grid-column: span 2 !important;
     display: flex !important;
@@ -1771,22 +1771,22 @@ body.dark-theme .form-section-card:hover {
     width: 100% !important;
   }
   /* Descrição em largura total */
-  .expense-row.bank-row:not(.minimized) > .input-container:nth-of-type(1) {
+  .expense-row.bank-row:not(.minimized) > :nth-child(1) {
     grid-row: 1;
     grid-column: span 2 !important;
   }
   /* Categoria (50% de largura) */
-  .expense-row.bank-row:not(.minimized) > .input-container:nth-of-type(3) {
+  .expense-row.bank-row:not(.minimized) > :nth-child(3) {
     grid-row: 2;
     grid-column: span 1 !important;
   }
   /* Valor (50% de largura) */
-  .expense-row.bank-row:not(.minimized) > .input-container:nth-of-type(2) {
+  .expense-row.bank-row:not(.minimized) > :nth-child(2) {
     grid-row: 2;
     grid-column: span 1 !important;
   }
   /* Ações na parte inferior */
-  .expense-row.bank-row:not(.minimized) > .expense-actions-stack {
+  .expense-row.bank-row:not(.minimized) > :nth-child(4) {
     grid-row: 3;
     grid-column: span 2 !important;
     display: flex !important;
