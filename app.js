@@ -1153,6 +1153,30 @@ function formatCurrency(value) {
 // --- CONTROLE DE DESPESAS DINÂMICAS ---
 function addValeRow(employeeName = "", value = "", category = "folha", containerId = "vales-list-container") {
   const container = document.getElementById(containerId);
+  
+  // Validação: não permitir adicionar manualmente se já houver algum vale ou despesa não confirmado no mesmo escopo
+  if (!employeeName && !value) {
+    const scopeContainerIds = containerId.startsWith("edit-") 
+      ? ["edit-vales-list-container", "edit-expense-list-container"] 
+      : ["vales-list-container", "expense-list-container"];
+
+    let hasActiveUnconfirmed = false;
+    scopeContainerIds.forEach(id => {
+      const parent = document.getElementById(id);
+      if (parent) {
+        const rows = parent.querySelectorAll(".expense-row:not(.minimized)");
+        if (rows.length > 0) {
+          hasActiveUnconfirmed = true;
+        }
+      }
+    });
+
+    if (hasActiveUnconfirmed) {
+      alert("⚠️ Por favor, confirme (clicando no botão 'OK') a despesa ou vale atual antes de adicionar um novo.");
+      return;
+    }
+  }
+
   const rowId = `vale-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const row = document.createElement("div");
@@ -1194,10 +1218,39 @@ function addValeRow(employeeName = "", value = "", category = "folha", container
   container.prepend(row);
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
+
+  // Minimizar automaticamente se for um carregamento de dados pré-existentes
+  if (employeeName && value) {
+    toggleRowMinimize(rowId, "vale");
+  }
 }
 
 function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "", observation = "") {
   const container = document.getElementById(containerId);
+  
+  // Validação: não permitir adicionar manualmente se já houver algum vale ou despesa não confirmado no mesmo escopo
+  if (!description && !value) {
+    const scopeContainerIds = containerId.startsWith("edit-") 
+      ? ["edit-vales-list-container", "edit-expense-list-container"] 
+      : ["vales-list-container", "expense-list-container"];
+
+    let hasActiveUnconfirmed = false;
+    scopeContainerIds.forEach(id => {
+      const parent = document.getElementById(id);
+      if (parent) {
+        const rows = parent.querySelectorAll(".expense-row:not(.minimized)");
+        if (rows.length > 0) {
+          hasActiveUnconfirmed = true;
+        }
+      }
+    });
+
+    if (hasActiveUnconfirmed) {
+      alert("⚠️ Por favor, confirme (clicando no botão 'OK') a despesa ou vale atual antes de adicionar um novo.");
+      return;
+    }
+  }
+
   const rowId = `expense-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const row = document.createElement("div");
@@ -1253,6 +1306,11 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
   }
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
+
+  // Minimizar automaticamente se for um carregamento de dados pré-existentes
+  if (description && value) {
+    toggleRowMinimize(rowId, "expense");
+  }
 }
 
 // Controla a minimização/colapso de linhas dinâmicas de vales e despesas
