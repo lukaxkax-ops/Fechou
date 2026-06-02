@@ -2538,7 +2538,7 @@ async function editClosing(dateStr, shiftStr = "dia") {
   const editContainer = document.getElementById("modal-edit-form-content");
   
   let revenuesFormHtml = `
-    <div>
+    <div class="form-section-card recipes-card">
       <h3 class="sub-section-title">
         <i data-lucide="coins" class="text-revenue"></i> Receitas (${formatDate(day.date)})
       </h3>
@@ -2570,12 +2570,12 @@ async function editClosing(dateStr, shiftStr = "dia") {
 
   // Despesas e Vales separados no modal
   let expensesFormHtml = `
-    <div>
+    <div class="form-section-right-column">
       <!-- Vales no Modal -->
-      <div style="margin-bottom: 20px; border-bottom: 1px dashed var(--border-glass); padding-bottom: 16px;">
+      <div class="form-section-card vales-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h3 class="sub-section-title" style="margin-bottom: 0;">
-            <i data-lucide="users" style="color: var(--secondary)"></i> Vales de Funcionários
+            <i data-lucide="users" style="color: #6366f1"></i> Vales de Funcionários
           </h3>
           <button type="button" class="btn btn-secondary btn-sm" onclick="addValeRow('','','edit-vales-list-container')">
             <i data-lucide="plus"></i> Adicionar Vale
@@ -2587,7 +2587,7 @@ async function editClosing(dateStr, shiftStr = "dia") {
       </div>
 
       <!-- Despesas Gerais no Modal -->
-      <div>
+      <div class="form-section-card expenses-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h3 class="sub-section-title" style="margin-bottom: 0;">
             <i data-lucide="trending-down" class="text-expense"></i> Despesas Gerais

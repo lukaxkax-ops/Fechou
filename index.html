@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.json?v=2">
   <link rel="apple-touch-icon" href="icon-512.png">
   <link rel="icon" type="image/png" href="icon-512.png">
-  <link rel="stylesheet" href="style.css?v=13.0">
+  <link rel="stylesheet" href="style.css?v=14.0">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -299,7 +299,7 @@
 
               <div class="form-grid-columns">
                 <!-- Coluna de Receitas -->
-                <div>
+                <div class="form-section-card recipes-card">
                   <h3 class="sub-section-title">
                     <i data-lucide="coins" class="text-revenue"></i> Receitas por Canal
                   </h3>
@@ -394,12 +394,12 @@
                 </div>
 
                 <!-- Coluna de Despesas e Vales -->
-                <div>
+                <div class="form-section-right-column">
                   <!-- Setor Específico de Vales de Funcionários -->
-                  <div style="margin-bottom: 24px; border-bottom: 1px dashed var(--border-glass); padding-bottom: 20px;">
+                  <div class="form-section-card vales-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                       <h3 class="sub-section-title" style="margin-bottom: 0;">
-                        <i data-lucide="users" style="color: var(--secondary)"></i> Vales de Funcionários
+                        <i data-lucide="users" style="color: #6366f1"></i> Vales de Funcionários
                       </h3>
                       <button type="button" class="btn btn-secondary btn-sm" onclick="addValeRow()">
                         <i data-lucide="plus"></i> Adicionar Vale
@@ -413,7 +413,7 @@
                   </div>
 
                   <!-- Setor de Despesas Gerais -->
-                  <div>
+                  <div class="form-section-card expenses-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                       <h3 class="sub-section-title" style="margin-bottom: 0;">
                         <i data-lucide="trending-down" class="text-expense"></i> Despesas Gerais (Compras/Contas)
@@ -443,7 +443,7 @@
               </div>
 
               <!-- Rodapé do Formulário -->
-              <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid var(--border-glass); padding-top: 18px;">
+              <div class="form-footer">
                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
                   <i data-lucide="rotate-ccw"></i> Limpar Formulário
                 </button>
@@ -1327,7 +1327,7 @@
               <input type="file" id="edit-notes-photo-input" accept="image/*" style="display: none;" onchange="handleEditNotesPhoto(this)">
             </div>
           </div>
-          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; border-top: 1px solid var(--border-glass); padding-top: 16px;">
+          <div class="form-footer">
             <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit')">Cancelar</button>
             <button type="submit" class="btn btn-primary">Salvar Alterações</button>
           </div>
@@ -1518,6 +1518,6 @@
   </div>
 
   <!-- JS App Principal -->
-  <script src="app.js?v=21.0"></script>
+  <script src="app.js?v=22.0"></script>
 </body>
 </html>

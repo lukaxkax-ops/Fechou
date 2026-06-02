@@ -1544,39 +1544,262 @@ button:disabled {
   grid-template-columns: 1.5fr 120px 140px 42px !important;
 }
 
+/* =====================================================================
+   Estilização Premium para Divisórias e Cards de Seção
+   ===================================================================== */
+.form-section-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 24px;
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+/* Indicadores de Destaque Coloridos (Top Border Dividers) */
+.form-section-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.recipes-card::before {
+  background: linear-gradient(90deg, var(--color-revenue) 0%, var(--accent) 100%);
+}
+
+.vales-card::before {
+  background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+}
+
+.expenses-card::before {
+  background: linear-gradient(90deg, var(--color-expense) 0%, #f43f5e 100%);
+}
+
+.form-section-card:hover {
+  border-color: rgba(15, 27, 45, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 27, 45, 0.03);
+}
+
+body.dark-theme .form-section-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Rodapé do Formulário Customizado */
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  border-top: 1px solid var(--border-glass);
+  padding-top: 18px;
+}
+
+/* =====================================================================
+   Responsividade Mobile Customizada
+   ===================================================================== */
 @media (max-width: 850px) {
-  /* Empilhamento Flexível no Mobile para evitar quebras em linhas com muitos campos */
-  .expense-row,
-  .expense-row.general-expense-row,
-  .expense-row.bank-row {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
+  /* 1. Grid Compacto de 12 Colunas para Vales no Mobile */
+  .expense-row:not(.general-expense-row):not(.bank-row) {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
     gap: 10px !important;
     padding: 12px !important;
+    align-items: flex-end !important;
   }
-  .expense-row .input-container,
-  .expense-row.general-expense-row .input-container,
-  .expense-row.bank-row .input-container {
-    width: 100% !important;
-    grid-column: unset !important;
-  }
-  .expense-row button.btn-icon-danger,
-  .expense-row.general-expense-row .expense-actions-stack,
-  .expense-row.bank-row .expense-actions-stack {
-    align-self: flex-end !important;
+  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container {
     width: auto !important;
-    grid-column: unset !important;
-    flex-direction: row !important;
-    margin-top: 4px !important;
   }
-  /* Ajusta botões do vale no mobile */
-  .expense-row button.btn-icon-danger {
+  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(1) {
+    grid-column: span 10 !important;
+  }
+  .expense-row:not(.general-expense-row):not(.bank-row) > button.btn-icon-danger {
+    grid-column: span 2 !important;
+    align-self: flex-end !important;
     width: 100% !important;
+    height: 38px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    margin-top: 0 !important;
+  }
+  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(2) {
+    grid-column: span 7 !important;
+  }
+  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(3) {
+    grid-column: span 5 !important;
+  }
+
+  /* 2. Grid Compacto de 12 Colunas para Despesas Gerais no Mobile */
+  .expense-row.general-expense-row {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    align-items: flex-end !important;
+  }
+  .expense-row.general-expense-row > .input-container {
+    width: auto !important;
+  }
+  .expense-row.general-expense-row > .input-container:nth-child(1) {
+    grid-row: 1;
+    grid-column: span 9 !important;
+  }
+  .expense-row.general-expense-row > .expense-actions-stack {
+    grid-row: 1;
+    grid-column: span 3 !important;
+    flex-direction: row !important;
+    align-self: flex-end !important;
+    width: 100% !important;
+    height: 38px !important;
+    gap: 8px !important;
+    margin-top: 0 !important;
+  }
+  .expense-row.general-expense-row > .expense-actions-stack button,
+  .expense-row.general-expense-row > .expense-actions-stack .btn-icon-danger {
+    flex: 1 !important;
+    height: 38px !important;
+    margin: 0 !important;
+  }
+  .expense-row.general-expense-row > .input-container:nth-child(2) {
+    grid-row: 2;
+    grid-column: span 7 !important;
+  }
+  .expense-row.general-expense-row > .input-container:nth-child(4) {
+    grid-row: 2;
+    grid-column: span 5 !important;
+  }
+  .expense-row.general-expense-row > .input-container:nth-child(3) {
+    grid-row: 3;
+    grid-column: span 12 !important;
+  }
+
+  /* 3. Grid Compacto de 12 Colunas para Linhas Bancárias no Mobile */
+  .expense-row.bank-row {
+    display: grid !important;
+    grid-template-columns: repeat(12, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    align-items: flex-end !important;
+  }
+  .expense-row.bank-row > .input-container {
+    width: auto !important;
+  }
+  .expense-row.bank-row > .input-container:nth-child(1) {
+    grid-row: 1;
+    grid-column: span 9 !important;
+  }
+  .expense-row.bank-row > .expense-actions-stack {
+    grid-row: 1;
+    grid-column: span 3 !important;
+    flex-direction: row !important;
+    align-self: flex-end !important;
+    width: 100% !important;
+    height: 38px !important;
+    gap: 8px !important;
+    margin-top: 0 !important;
+  }
+  .expense-row.bank-row > .expense-actions-stack button,
+  .expense-row.bank-row > .expense-actions-stack .btn-icon-danger {
+    flex: 1 !important;
+    height: 38px !important;
+    margin: 0 !important;
+  }
+  .expense-row.bank-row > .input-container:nth-child(3) {
+    grid-row: 2;
+    grid-column: span 7 !important;
+  }
+  .expense-row.bank-row > .input-container:nth-child(2) {
+    grid-row: 2;
+    grid-column: span 5 !important;
+  }
+
+  /* 4. Cabeçalho de Lançamento em Grid no Mobile */
+  .section-title-wrapper > div {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  .section-title-wrapper > div > .input-container {
+    margin-bottom: 0 !important;
+  }
+  .section-title-wrapper > div > .input-container:nth-of-type(1) {
+    grid-column: span 2 !important;
+  }
+  .section-title-wrapper > div > .input-container:nth-of-type(2),
+  .section-title-wrapper > div > .input-container:nth-of-type(3) {
+    grid-column: span 1 !important;
   }
 }
+
+@media (max-width: 600px) {
+  /* 5. Otimização de Receitas em Linhas do Tipo Carteira (Wallet rows) no Mobile */
+  .revenue-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .revenue-group .input-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    border-bottom: 1px dashed var(--border-glass) !important;
+    padding-bottom: 8px !important;
+  }
+  
+  .revenue-group .input-container:last-child {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+  }
+  
+  .revenue-group .input-container label {
+    margin-bottom: 0 !important;
+    font-size: 13px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    white-space: nowrap !important;
+    flex: 1 !important;
+  }
+  
+  .revenue-group .input-container label svg,
+  .revenue-group .input-container label i {
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 0 !important;
+  }
+  
+  .revenue-group .input-container .input-wrapper {
+    flex: none !important;
+    width: 130px !important;
+  }
+  
+  .revenue-group .input-container .form-control {
+    text-align: right !important;
+    padding-right: 10px !important;
+    font-size: 14px !important;
+  }
+
+  /* 6. Empilhamento e Redimensionamento de Botões de Rodapé */
+  .form-footer {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+  }
+  .form-footer .btn {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 15px !important;
+  }
+}
+
 
 
