@@ -1,4 +1,4 @@
-# Checklist de Implementação - Turno Madrugada & Validação de Confirmação
+# Checklist de Implementação - Turno Madrugada, Confirmação & Botão OK
 
 - [x] Adicionar o turno "Madrugada" nos dropdowns de seleção (`index.html`)
   - [x] Lançamento de Caixa Principal (`#closing-shift`)
@@ -13,13 +13,17 @@
   - [x] Mapeamentos de turnos e emojis (`🌌 Madrugada`) em tabelas e alertas
   - [x] Formatação de texto para compartilhamento no WhatsApp (Caixa e Banco)
   - [x] Lógica de detecção de duplicidade/senha administrativa para o turno madrugada
-- [x] **Bloqueio de Novas Linhas sem Confirmação**
+- [x] Bloqueio de Novas Linhas sem Confirmação
   - [x] Adicionar verificação de escopo (Caixa Principal ou Edição) em `addValeRow` e `addGeneralExpenseRow`
   - [x] Impedir a adição se houver alguma linha ativa (não minimizada) e exibir alerta explicativo
-  - [x] Habilitar auto-minimização ao carregar registros já preenchidos (evitando bloqueios em lote no carregamento)
+  - [x] Habilitar auto-minimização ao carregar registros já preenchidos
+- [x] **Adicionar palavra 'OK' nos botões de confirmação**
+  - [x] Inserir o texto "OK" ao lado do ícone de check em `addValeRow` e `addGeneralExpenseRow`
+  - [x] Manter o comportamento do texto "OK" ao re-expandir e alternar o estado do botão
+  - [x] Ajustar larguras das colunas de ações no desktop em `style.css` (de 80px/110px para 100px/140px)
 - [x] Controle de cache e versionamento (Cache-Busting)
-  - [x] Incrementar versão do script (`app.js?v=25.0`) e estilo (`style.css?v=18.0`) em `index.html`
-  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v41`
+  - [x] Incrementar versão do script (`app.js?v=26.0`) e estilo (`style.css?v=19.0`) em `index.html`
+  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v42`
 - [x] Deployment e Sincronização
   - [x] Copiar novos arquivos para o repositório de produção `fechou-deploy`
   - [x] Stager, commiter e dar push nos dois repositórios (dev e prod)

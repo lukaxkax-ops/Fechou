@@ -1,18 +1,22 @@
-# Walkthrough: Turno Madrugada & Trava de Validação de Despesas/Vales
+# Walkthrough: Turno Madrugada, Trava de Validação & Botão OK
 
-Este documento detalha as atualizações realizadas para adicionar o novo turno **Madrugada** ao sistema *Fechou!*, além do mecanismo de segurança que obriga a confirmação de uma despesa/vale antes de adicionar outra.
+Este documento detalha as atualizações realizadas para adicionar o novo turno **Madrugada** ao sistema *Fechou!*, o mecanismo de trava de segurança para confirmação obrigatória de despesas/vales, e a adição visual da palavra **"OK"** no botão de confirmação.
 
 ---
 
 ## 🛠️ O que foi Implementado
 
-### 1. Trava de Confirmação de Linhas (Validação Dinâmica)
-* **Comportamento:** Agora, o sistema impede o usuário de clicar em "Adicionar" para criar um novo vale ou uma nova despesa se houver alguma linha existente que ainda não tenha sido confirmada (ou seja, que esteja expandida, sem que o usuário tenha clicado no botão "OK" de confirmação/minimização).
-* **Alerta Explicativo:** Se o usuário tentar burlar essa validação, uma mensagem em caixa de diálogo amigável é exibida: `⚠️ Por favor, confirme (clicando no botão 'OK') a despesa ou vale atual antes de adicionar um novo.`.
-* **Escopo Inteligente:** A validação é auto-contida. Se o usuário estiver na tela de lançamento principal, ela verifica apenas as listas principais de vales e despesas. Se o usuário estiver no modal de edição de caixa, ela valida no escopo do modal, garantindo flexibilidade total.
-* **Auto-Minimização de Dados Salvos:** Ao abrir um fechamento existente para visualização/edição, os dados pré-existentes são carregados em lote e minimizados automaticamente desde o início. Isso evita que o usuário precise confirmar manualmente todos os itens antigos antes de poder inserir um item novo.
+### 1. Rótulo Visual "OK" nos Botões de Confirmação
+* **Mudança:** Para facilitar o entendimento por parte dos operadores, adicionamos explicitamente a palavra **"OK"** ao lado do ícone de checkmark (`check`) nos botões de confirmação de linhas de despesas e vales.
+* **Layout Responsivo:** No desktop, aumentamos a largura da coluna de ações de `.expense-row` (de `80px` para `100px`) e de `.expense-row.general-expense-row` (de `110px` para `140px`) para comportar os botões com texto sem apertar o design. No mobile, os botões ocupam flexivelmente o rodapé do card, mantendo-se espaçosos e intuitivos.
+* **Comportamento Dinâmico:** Ao alternar o estado de minimizado (resumo verde) para expandido (edição de inputs), o botão exibe dinamicamente o texto `"OK"` ao lado do checkmark. Quando minimizado, o botão exibe apenas o ícone de lápis (`pencil`) em formato compacto, maximizando a área de leitura do resumo.
 
-### 2. Adição do Turno Madrugada (HTML)
+### 2. Trava de Confirmação de Linhas (Validação Dinâmica)
+* **Comportamento:** O sistema impede o usuário de clicar em "Adicionar" para criar um novo vale ou uma nova despesa se houver alguma linha existente que ainda não tenha sido confirmada (ou seja, que esteja expandida, sem que o usuário tenha clicado no botão "OK" de confirmação/minimização).
+* **Alerta Explicativo:** Se o usuário tentar adicionar um novo campo com outro pendente, uma mensagem é exibida: `⚠️ Por favor, confirme (clicando no botão 'OK') a despesa ou vale atual antes de adicionar um novo.`.
+* **Auto-Minimização de Dados Salvos:** Ao abrir um fechamento existente, os dados pré-existentes são carregados em lote e minimizados automaticamente desde o início.
+
+### 3. Adição do Turno Madrugada (HTML)
 Adicionamos o turno "Madrugada" (valor `"madrugada"`) com o emoji correspondente `🌌` em todos os seletores dropdown do aplicativo em [index.html](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/index.html):
 * **Lançamento de Caixa Principal (`#closing-shift`)**
 * **Lançamento Bancário Principal (`#bank-closing-shift`)**
@@ -20,22 +24,16 @@ Adicionamos o turno "Madrugada" (valor `"madrugada"`) com o emoji correspondente
 * **Modal de Edição Bancária (`#edit-bank-closing-shift`)**
 * **Filtro do Histórico (`#filter-shift`):** Estendido de `"Todos (☀️🌙)"` para `"Todos (☀️🌙🌌)"`.
 
-### 3. Estilização Premium da Badge (CSS)
+### 4. Estilização Premium da Badge (CSS)
 Criamos uma nova classe de badge específica para o turno Madrugada em [style.css](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/style.css):
 * **Visual:** Fundo roxo translúcido (`rgba(139, 92, 246, 0.12)`) e texto violeta vibrante (`#8b5cf6`).
 * **Suporte a Tema Escuro:** Adaptado automaticamente para o Dark Mode (`body.dark-theme .badge-madrugada`), utilizando um fundo roxo ligeiramente mais opaco e texto suave de alta legibilidade (`#c084fc`).
 
-### 4. Adaptação da Lógica do Sistema (JavaScript)
-Atualizamos todas as condicionais e retornos de turnos que eram restritos a um fluxo binário (dia ou noite) em [app.js](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/app.js):
-* **Badges nas Tabelas e Cards:** A badge dinâmica renderiza o texto `"🌌 Madrugada"` e a classe `.badge-madrugada` se o lançamento possuir o turno `"madrugada"`.
-* **Mensagens do WhatsApp:** Os textos gerados para compartilhamento no WhatsApp (Caixa, Banco e Extrato de Vales) identificam o turno de Madrugada como `"🌌 Madrugada"`.
-* **Proteção contra Duplicidade e Edições:** As janelas de confirmação, avisos de gravação e prompts para inserção de **Senha Administrativa** mostram corretamente o rótulo `"Madrugada"`.
-
 ### 5. Controle de Cache e Versionamento (Cache-Busting)
 * Incrementada a versão das tags de importação de script/CSS no `index.html` para:
-  * `app.js?v=25.0`
-  * `style.css?v=18.0`
-* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/sw.js) foi atualizado para utilizar o cache `"fechou-cache-v41"`.
+  * `app.js?v=26.0`
+  * `style.css?v=19.0`
+* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/sw.js) foi atualizado para utilizar o cache `"fechou-cache-v42"`.
 
 ---
 
