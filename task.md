@@ -1,42 +1,21 @@
-# Tarefas - Filtro de Operadores, Mensalidade Dinâmica e Ajustes do Operador
+# Checklist de Implementação - Turno Madrugada
 
-- [x] Implementação no Painel Mestre
-  - [x] Adicionar campo de busca para filtragem na listagem de operadores (`index.html`)
-  - [x] Implementar a lógica de filtragem instantânea `filterMasterUsers()` no `app.js`
-  - [x] Injetar dados de Loja, Usuário, E-mail e Licença como datasets nos elementos `tr` em `loadMasterPanel()`
-  - [x] Adicionar input de valor da mensalidade dinâmico no formulário de contato mestre (`index.html`)
-  - [x] Persistir e ler a propriedade `subscriptionAmount` no `master_contact_settings` (salvar e ler no Upstash)
-- [x] Injeção de Mensalidade Dinâmica no Operador Comum
-  - [x] Mapear IDs em `license-expired-banner-text`, `tab-subscription-amount` e `overlay-subscription-amount` no HTML
-  - [x] Atualizar `loadUserContactInfo()` para substituir as referências fixas de "R$ 49,90" pelo valor dinâmico
-  - [x] Integrar o valor dinâmico em `updatePixPaymentDetails()` and `generatePixPayload()` para recalcular QR Code Pix
-  - [x] Criar e utilizar o helper `showLicenseExpiredAlert(action)` para alertas consistentes de Modo Leitura
-- [x] Ajuste no Construtor de Despesas Gerais & Vales
-  - [x] Remover o dropdown de categoria em `addGeneralExpenseRow()` no `app.js`
-  - [x] Atualizar `.expense-row` no `style.css` para usar grid de 3 colunas (`1fr 120px 42px`) no desktop
-  - [x] Atualizar o alinhamento de `addValeRow()` (remover span 2 do nome)
-  - [x] Adaptar a media query mobile no `style.css` para empilhar descrição/nome no span 2 e colocar valor e ações lado a lado
-  - [x] Tratar com fallback `"outros"` em `saveClosing()` and `saveEditClosing()` caso o seletor `.expense-cat` seja nulo
-- [x] Segurança & Bloqueios no Operador Comum
-  - [x] Implementar bloqueio contra datas futuras em `saveClosing()`, `saveEditClosing()`, `saveBankClosing()` and `saveEditBankClosing()`
-  - [x] Definir o atributo `max` para a data de hoje nos inputs de calendário na inicialização e modais
-  - [x] Implementar a verificação de duplicidade de data e turno com exigência da **Senha Administrativa** em `saveClosing()`
-  - [x] Implementar a mesma exigência de senha em `saveBankClosing()`
-- [x] Correção do WhatsApp & Vetor Oficial (SVG)
-  - [x] Tratar com fallback `(📑 Nota: Anexo Local)` em `getFormattedWhatsAppText()` caso a foto comece com `data:image` (Base64), impedindo o erro 414 de URL gigante
-  - [x] Migrar todos os links obsoletos de `https://api.whatsapp.com/send?text=` para `https://wa.me/?text=`
-  - [x] Criar o inline SVG do logo oficial do WhatsApp
-  - [x] Injetar o logo nos botões da tabela de históricos em `app.js`
-  - [x] Injetar o logo nos botões do modal de detalhes, aba de assinatura e overlay de cobrança em `index.html`
-- [x] Ajuste do Logo de Marca Oficial
-  - [x] Identificar e confirmar a integridade de `icon-512.png` como o logo correto enviado pelo usuário
-  - [x] Substituir o ícone genérico `calculator` da Lucide pelo elemento `<img>` oficial no card de login (`index.html`)
-  - [x] Substituir o ícone no cabeçalho superior (header) do operador comum (`index.html`)
-  - [x] Substituir o ícone no cabeçalho do menu lateral (sidebar) do operador comum (`index.html`)
-  - [x] Substituir o ícone do painel mestre no menu lateral do administrador (`index.html`)
-  - [x] Incrementar a versão do cache de `fechou-cache-v26` para `fechou-cache-v27` no Service Worker (`sw.js`)
-- [x] Verificação, Testes e Sincronização
-  - [x] Validar todas as rotas e fluxos de dados
-  - [x] Testar compatibilidade responsiva em mobile
-  - [x] Realizar commit e deploy no GitHub Pages do repositório oficial Fechou!
-
+- [x] Adicionar o turno "Madrugada" nos dropdowns de seleção (`index.html`)
+  - [x] Lançamento de Caixa Principal (`#closing-shift`)
+  - [x] Filtro de Histórico de Caixa (`#filter-shift`)
+  - [x] Lançamento Bancário Principal (`#bank-closing-shift`)
+  - [x] Edição de Caixa Modal (`#edit-closing-shift`)
+  - [x] Edição Bancária Modal (`#edit-bank-closing-shift`)
+- [x] Estilizar a nova badge do turno Madrugada (`style.css`)
+  - [x] Cor roxa/índigo para o tema claro (`.badge-madrugada`)
+  - [x] Ajuste correspondente de opacidade e cor para o tema escuro (`body.dark-theme .badge-madrugada`)
+- [x] Atualizar a lógica do JavaScript (`app.js`)
+  - [x] Mapeamentos de turnos e emojis (`🌌 Madrugada`) em tabelas e alertas
+  - [x] Formatação de texto para compartilhamento no WhatsApp (Caixa e Banco)
+  - [x] Lógica de detecção de duplicidade/senha administrativa para o turno madrugada
+- [x] Controle de cache e versionamento (Cache-Busting)
+  - [x] Incrementar versão do script (`app.js?v=24.0`) e estilo (`style.css?v=18.0`) em `index.html`
+  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v40`
+- [x] Deployment e Sincronização
+  - [x] Copiar novos arquivos para o repositório de produção `fechou-deploy`
+  - [x] Stager, commiter e dar push nos dois repositórios (dev e prod)
