@@ -1658,128 +1658,150 @@ body.dark-theme .form-section-card:hover {
    Responsividade Mobile Customizada
    ===================================================================== */
 @media (max-width: 850px) {
-  /* 1. Grid Compacto de 12 Colunas para Vales no Mobile */
-  .expense-row:not(.general-expense-row):not(.bank-row) {
-    display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-    gap: 10px !important;
+  /* Otimização de Espaço: Reduzir padding dos cards internos no mobile */
+  .form-section-card {
     padding: 12px !important;
-    align-items: flex-end !important;
-  }
-  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container {
-    width: auto !important;
-  }
-  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(1) {
-    grid-row: 1;
-    grid-column: span 9 !important;
-  }
-  .expense-row:not(.general-expense-row):not(.bank-row) > .expense-actions-stack {
-    grid-row: 1;
-    grid-column: span 3 !important;
-    flex-direction: row !important;
-    align-self: flex-end !important;
-    width: 100% !important;
-    height: 38px !important;
-    gap: 8px !important;
-    margin-top: 0 !important;
-  }
-  .expense-row:not(.general-expense-row):not(.bank-row) > .expense-actions-stack button,
-  .expense-row:not(.general-expense-row):not(.bank-row) > .expense-actions-stack .btn-icon-danger {
-    flex: 1 !important;
-    height: 38px !important;
-    margin: 0 !important;
-  }
-  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(2) {
-    grid-row: 2;
-    grid-column: span 7 !important;
-  }
-  .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(3) {
-    grid-row: 2;
-    grid-column: span 5 !important;
+    margin-bottom: 16px !important;
   }
 
-  /* 2. Grid Compacto de 12 Colunas para Despesas Gerais no Mobile */
-  .expense-row.general-expense-row {
+  /* 1. Layout de Grid Amplo para Vales no Mobile (Expandido) */
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) {
     display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-    gap: 10px !important;
-    padding: 12px !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    padding: 14px !important;
     align-items: flex-end !important;
   }
-  .expense-row.general-expense-row > .input-container {
-    width: auto !important;
-  }
-  .expense-row.general-expense-row > .input-container:nth-child(1) {
-    grid-row: 1;
-    grid-column: span 9 !important;
-  }
-  .expense-row.general-expense-row > .expense-actions-stack {
-    grid-row: 1;
-    grid-column: span 3 !important;
-    flex-direction: row !important;
-    align-self: flex-end !important;
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container {
     width: 100% !important;
-    height: 38px !important;
-    gap: 8px !important;
-    margin-top: 0 !important;
   }
-  .expense-row.general-expense-row > .expense-actions-stack button,
-  .expense-row.general-expense-row > .expense-actions-stack .btn-icon-danger {
-    flex: 1 !important;
-    height: 38px !important;
-    margin: 0 !important;
+  /* Nome do funcionário em largura total */
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container:nth-of-type(1) {
+    grid-row: 1;
+    grid-column: span 2 !important;
   }
-  .expense-row.general-expense-row > .input-container:nth-child(2) {
+  /* Categoria (50% de largura) */
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container:nth-of-type(2) {
     grid-row: 2;
-    grid-column: span 7 !important;
+    grid-column: span 1 !important;
   }
-  .expense-row.general-expense-row > .input-container:nth-child(4) {
+  /* Valor do Vale (50% de largura) */
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .input-container:nth-of-type(3) {
     grid-row: 2;
-    grid-column: span 5 !important;
+    grid-column: span 1 !important;
   }
-  .expense-row.general-expense-row > .input-container:nth-child(3) {
+  /* Ações na parte inferior */
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .expense-actions-stack {
     grid-row: 3;
-    grid-column: span 12 !important;
-  }
-
-  /* 3. Grid Compacto de 12 Colunas para Linhas Bancárias no Mobile */
-  .expense-row.bank-row {
-    display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-    gap: 10px !important;
-    padding: 12px !important;
-    align-items: flex-end !important;
-  }
-  .expense-row.bank-row > .input-container {
-    width: auto !important;
-  }
-  .expense-row.bank-row > .input-container:nth-child(1) {
-    grid-row: 1;
-    grid-column: span 9 !important;
-  }
-  .expense-row.bank-row > .expense-actions-stack {
-    grid-row: 1;
-    grid-column: span 3 !important;
+    grid-column: span 2 !important;
+    display: flex !important;
     flex-direction: row !important;
-    align-self: flex-end !important;
+    justify-content: flex-end !important;
     width: 100% !important;
-    height: 38px !important;
+    margin-top: 4px !important;
     gap: 8px !important;
-    margin-top: 0 !important;
   }
-  .expense-row.bank-row > .expense-actions-stack button,
-  .expense-row.bank-row > .expense-actions-stack .btn-icon-danger {
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .expense-actions-stack button,
+  .expense-row:not(.general-expense-row):not(.bank-row):not(.minimized) > .expense-actions-stack .btn-icon-danger {
     flex: 1 !important;
-    height: 38px !important;
+    max-width: 120px !important;
+    height: 42px !important;
     margin: 0 !important;
   }
-  .expense-row.bank-row > .input-container:nth-child(3) {
-    grid-row: 2;
-    grid-column: span 7 !important;
+
+  /* 2. Layout de Grid Amplo para Despesas Gerais no Mobile (Expandido) */
+  .expense-row.general-expense-row:not(.minimized) {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    align-items: flex-end !important;
   }
-  .expense-row.bank-row > .input-container:nth-child(2) {
+  .expense-row.general-expense-row:not(.minimized) > .input-container {
+    width: 100% !important;
+  }
+  /* Descrição em largura total */
+  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(1) {
+    grid-row: 1;
+    grid-column: span 2 !important;
+  }
+  /* Categoria (50% de largura) */
+  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(2) {
     grid-row: 2;
-    grid-column: span 5 !important;
+    grid-column: span 1 !important;
+  }
+  /* Valor (50% de largura) */
+  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(4) {
+    grid-row: 2;
+    grid-column: span 1 !important;
+  }
+  /* Observação em largura total */
+  .expense-row.general-expense-row:not(.minimized) > .input-container:nth-of-type(3) {
+    grid-row: 3;
+    grid-column: span 2 !important;
+  }
+  /* Ações na parte inferior */
+  .expense-row.general-expense-row:not(.minimized) > .expense-actions-stack {
+    grid-row: 4;
+    grid-column: span 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    gap: 8px !important;
+  }
+  .expense-row.general-expense-row:not(.minimized) > .expense-actions-stack button,
+  .expense-row.general-expense-row:not(.minimized) > .expense-actions-stack .btn-icon-danger {
+    flex: 1 !important;
+    max-width: 100px !important;
+    height: 42px !important;
+    margin: 0 !important;
+  }
+
+  /* 3. Layout de Grid Amplo para Linhas Bancárias no Mobile (Expandido) */
+  .expense-row.bank-row:not(.minimized) {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    align-items: flex-end !important;
+  }
+  .expense-row.bank-row:not(.minimized) > .input-container {
+    width: 100% !important;
+  }
+  /* Descrição em largura total */
+  .expense-row.bank-row:not(.minimized) > .input-container:nth-of-type(1) {
+    grid-row: 1;
+    grid-column: span 2 !important;
+  }
+  /* Categoria (50% de largura) */
+  .expense-row.bank-row:not(.minimized) > .input-container:nth-of-type(3) {
+    grid-row: 2;
+    grid-column: span 1 !important;
+  }
+  /* Valor (50% de largura) */
+  .expense-row.bank-row:not(.minimized) > .input-container:nth-of-type(2) {
+    grid-row: 2;
+    grid-column: span 1 !important;
+  }
+  /* Ações na parte inferior */
+  .expense-row.bank-row:not(.minimized) > .expense-actions-stack {
+    grid-row: 3;
+    grid-column: span 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+    gap: 8px !important;
+  }
+  .expense-row.bank-row:not(.minimized) > .expense-actions-stack button,
+  .expense-row.bank-row:not(.minimized) > .expense-actions-stack .btn-icon-danger {
+    flex: 1 !important;
+    max-width: 120px !important;
+    height: 42px !important;
+    margin: 0 !important;
   }
 
   /* 4. Cabeçalho de Lançamento em Grid no Mobile */
@@ -1800,7 +1822,7 @@ body.dark-theme .form-section-card:hover {
     grid-column: span 1 !important;
   }
 
-  /* Garante que linhas minimizadas fiquem compactas e horizontais mesmo no mobile */
+  /* 5. Linhas Minimizadas Compactas e Horizontais no Mobile */
   .expense-row.minimized {
     display: grid !important;
     grid-template-columns: 1fr 80px !important;
@@ -1812,6 +1834,10 @@ body.dark-theme .form-section-card:hover {
   .expense-row.minimized > .expense-summary-text {
     grid-row: 1 !important;
     grid-column: 1 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    padding: 4px 0 !important;
+    line-height: 1.3 !important;
   }
   .expense-row.minimized > .expense-actions-stack {
     grid-row: 1 !important;
@@ -1819,11 +1845,20 @@ body.dark-theme .form-section-card:hover {
     display: flex !important;
     flex-direction: row !important;
     justify-content: flex-end !important;
+    gap: 6px !important;
+    width: auto !important;
+  }
+  .expense-row.minimized > .expense-actions-stack button,
+  .expense-row.minimized > .expense-actions-stack .btn-icon-danger {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 12px !important;
+    flex: none !important;
   }
 }
 
 @media (max-width: 600px) {
-  /* 5. Otimização de Receitas em Linhas do Tipo Carteira (Wallet rows) no Mobile */
+  /* 6. Otimização de Receitas em Linhas do Tipo Carteira (Wallet rows) no Mobile */
   .revenue-group {
     display: flex !important;
     flex-direction: column !important;
@@ -1873,7 +1908,7 @@ body.dark-theme .form-section-card:hover {
     font-size: 14px !important;
   }
 
-  /* 6. Empilhamento e Redimensionamento de Botões de Rodapé */
+  /* 7. Empilhamento e Redimensionamento de Botões de Rodapé */
   .form-footer {
     flex-direction: column-reverse !important;
     gap: 8px !important;
