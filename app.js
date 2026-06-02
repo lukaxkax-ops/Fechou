@@ -1160,6 +1160,7 @@ function addValeRow(employeeName = "", value = "", category = "folha", container
   row.id = rowId;
 
   row.innerHTML = `
+    <div class="expense-summary-text"></div>
     <div class="input-container">
       <label style="font-size: 11px;">Nome do Funcionário</label>
       <input type="text" class="form-control vale-desc" placeholder="Ex: João" value="${employeeName}" required>
@@ -1180,9 +1181,14 @@ function addValeRow(employeeName = "", value = "", category = "folha", container
         <input type="number" step="0.01" min="0.01" class="form-control vale-val form-control-prefix" style="padding-left: 28px;" placeholder="0,00" value="${value}" oninput="updateLiveDashboard()" required>
       </div>
     </div>
-    <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale">
-      <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
-    </button>
+    <div class="expense-actions-stack" style="margin-bottom: 0;">
+      <button type="button" class="btn-expense-ok" onclick="toggleRowMinimize('${rowId}', 'vale')" title="Confirmar Lançamento (Minimizar)" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
+        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+      </button>
+      <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
+        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+      </button>
+    </div>
   `;
 
   container.prepend(row);
@@ -1202,6 +1208,7 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
   }
 
   row.innerHTML = `
+    <div class="expense-summary-text"></div>
     <div class="input-container">
       <label style="font-size: 11px;">Descrição da Despesa</label>
       <input type="text" class="form-control expense-desc" placeholder="Ex: Pão de Hambúrguer" value="${description}" required>
@@ -1226,11 +1233,14 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
         <input type="number" step="0.01" min="0.01" class="form-control expense-val form-control-prefix" style="padding-left: 28px;" placeholder="0,00" value="${value}" oninput="updateLiveDashboard()" required>
       </div>
     </div>
-    <div class="expense-actions-stack" style="display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 42px; margin-bottom: 0;">
+    <div class="expense-actions-stack" style="margin-bottom: 0;">
       <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Foto da Nota" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
         <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
       </button>
       <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
+      <button type="button" class="btn-expense-ok" onclick="toggleRowMinimize('${rowId}', 'expense')" title="Confirmar Lançamento (Minimizar)" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
+        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+      </button>
       <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
         <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
       </button>
@@ -1243,6 +1253,87 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
   }
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
+}
+
+// Controla a minimização/colapso de linhas dinâmicas de vales e despesas
+function toggleRowMinimize(rowId, type) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  const isMinimized = row.classList.contains("minimized");
+  const toggleBtn = row.querySelector(".btn-expense-ok");
+  if (!toggleBtn) return;
+
+  if (isMinimized) {
+    // Expandir
+    row.classList.remove("minimized");
+    toggleBtn.innerHTML = `<i data-lucide="check" style="width: 16px; height: 16px;"></i>`;
+    toggleBtn.title = "Confirmar Lançamento (Minimizar)";
+    toggleBtn.style.background = "rgba(255, 255, 255, 0.05)";
+    toggleBtn.style.color = "var(--text-main)";
+    lucide.createIcons();
+  } else {
+    // Minimizar
+    let summaryHtml = "";
+    if (type === "vale") {
+      const nameInput = row.querySelector(".vale-desc");
+      const name = nameInput ? nameInput.value.trim() : "";
+      if (!name) {
+        alert("Por favor, preencha o Nome do Funcionário.");
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      const catSelect = row.querySelector(".vale-cat");
+      const catText = catSelect ? catSelect.options[catSelect.selectedIndex].text : "";
+
+      const valInput = row.querySelector(".vale-val");
+      const val = valInput ? valInput.value.trim() : "";
+      if (!val || parseFloat(val) <= 0) {
+        alert("Por favor, preencha um valor de vale válido.");
+        if (valInput) valInput.focus();
+        return;
+      }
+
+      summaryHtml = `👤 <span class="bold">${name}</span> &nbsp;•&nbsp; 🏷️ ${catText} &nbsp;•&nbsp; 💵 <span class="text-revenue bold">${formatCurrency(parseFloat(val))}</span>`;
+    } else if (type === "expense") {
+      const descInput = row.querySelector(".expense-desc");
+      const desc = descInput ? descInput.value.trim() : "";
+      if (!desc) {
+        alert("Por favor, preencha a Descrição da Despesa.");
+        if (descInput) descInput.focus();
+        return;
+      }
+
+      const catSelect = row.querySelector(".expense-cat");
+      const catText = catSelect ? catSelect.options[catSelect.selectedIndex].text : "";
+
+      const valInput = row.querySelector(".expense-val");
+      const val = valInput ? valInput.value.trim() : "";
+      if (!val || parseFloat(val) <= 0) {
+        alert("Por favor, preencha um valor de despesa válido.");
+        if (valInput) valInput.focus();
+        return;
+      }
+
+      const obsInput = row.querySelector(".expense-obs");
+      const obs = obsInput ? obsInput.value.trim() : "";
+
+      summaryHtml = `🛒 <span class="bold">${desc}</span> &nbsp;•&nbsp; 🏷️ ${catText} &nbsp;•&nbsp; 💵 <span class="text-expense bold">${formatCurrency(parseFloat(val))}</span>${obs ? ` &nbsp;•&nbsp; 📝 <span class="text-muted">${obs}</span>` : ""}`;
+    }
+
+    let summaryDiv = row.querySelector(".expense-summary-text");
+    if (summaryDiv) {
+      summaryDiv.innerHTML = summaryHtml;
+    }
+
+    row.classList.add("minimized");
+    toggleBtn.innerHTML = `<i data-lucide="pencil" style="width: 16px; height: 16px;"></i>`;
+    toggleBtn.title = "Editar Lançamento (Expandir)";
+    toggleBtn.style.background = "rgba(76, 194, 48, 0.12)";
+    toggleBtn.style.color = "var(--color-revenue)";
+    lucide.createIcons();
+  }
 }
 
 // Mantém suporte para chamadas legadas
@@ -2577,7 +2668,7 @@ async function editClosing(dateStr, shiftStr = "dia") {
           <h3 class="sub-section-title" style="margin-bottom: 0;">
             <i data-lucide="users" style="color: #6366f1"></i> Vales de Funcionários
           </h3>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="addValeRow('','','edit-vales-list-container')">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addValeRow('','','folha','edit-vales-list-container')">
             <i data-lucide="plus"></i> Adicionar Vale
           </button>
         </div>

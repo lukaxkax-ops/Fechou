@@ -1535,13 +1535,67 @@ button:disabled {
    Layout Desktop Customizado para as Linhas de Vales e Despesas
    ===================================================================== */
 .expense-row {
-  grid-template-columns: 1.5fr 140px 120px 42px !important;
+  grid-template-columns: 1.5fr 140px 120px 80px !important;
 }
 .expense-row.general-expense-row {
-  grid-template-columns: 1.5fr 140px 1.5fr 120px 42px !important;
+  grid-template-columns: 1.5fr 140px 1.5fr 120px 110px !important;
 }
 .expense-row.bank-row {
-  grid-template-columns: 1.5fr 120px 140px 42px !important;
+  grid-template-columns: 1.5fr 120px 140px 80px !important;
+}
+
+/* Container de botões de ação alinhados horizontalmente */
+.expense-actions-stack {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 6px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Estilo do Resumo quando Minimizado */
+.expense-summary-text {
+  display: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-main);
+  padding: 8px 12px;
+  align-self: center;
+}
+
+/* =====================================================================
+   Regras de Minimização (Colapso) de Linhas
+   ===================================================================== */
+.expense-row.minimized {
+  grid-template-columns: 1fr 80px !important;
+  background: rgba(76, 194, 48, 0.05) !important;
+  border-color: rgba(76, 194, 48, 0.22) !important;
+  padding: 8px 12px !important;
+  align-items: center !important;
+}
+
+body.dark-theme .expense-row.minimized {
+  background: rgba(92, 214, 62, 0.04) !important;
+  border-color: rgba(92, 214, 62, 0.15) !important;
+}
+
+/* Oculta inputs e foto quando minimizado */
+.expense-row.minimized > .input-container,
+.expense-row.minimized .btn-expense-photo {
+  display: none !important;
+}
+
+/* Exibe texto do resumo */
+.expense-row.minimized .expense-summary-text {
+  display: block !important;
+  grid-column: 1 !important;
+}
+
+/* Ajusta stack de ações quando minimizado */
+.expense-row.minimized > .expense-actions-stack {
+  grid-column: 2 !important;
+  width: 100% !important;
+  margin-top: 0 !important;
 }
 
 /* =====================================================================
@@ -1616,22 +1670,31 @@ body.dark-theme .form-section-card:hover {
     width: auto !important;
   }
   .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(1) {
-    grid-column: span 10 !important;
+    grid-row: 1;
+    grid-column: span 9 !important;
   }
-  .expense-row:not(.general-expense-row):not(.bank-row) > button.btn-icon-danger {
-    grid-column: span 2 !important;
+  .expense-row:not(.general-expense-row):not(.bank-row) > .expense-actions-stack {
+    grid-row: 1;
+    grid-column: span 3 !important;
+    flex-direction: row !important;
     align-self: flex-end !important;
     width: 100% !important;
     height: 38px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    gap: 8px !important;
     margin-top: 0 !important;
   }
+  .expense-row:not(.general-expense-row):not(.bank-row) > .expense-actions-stack button,
+  .expense-row:not(.general-expense-row):not(.bank-row) > .expense-actions-stack .btn-icon-danger {
+    flex: 1 !important;
+    height: 38px !important;
+    margin: 0 !important;
+  }
   .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(2) {
+    grid-row: 2;
     grid-column: span 7 !important;
   }
   .expense-row:not(.general-expense-row):not(.bank-row) > .input-container:nth-child(3) {
+    grid-row: 2;
     grid-column: span 5 !important;
   }
 
@@ -1735,6 +1798,27 @@ body.dark-theme .form-section-card:hover {
   .section-title-wrapper > div > .input-container:nth-of-type(2),
   .section-title-wrapper > div > .input-container:nth-of-type(3) {
     grid-column: span 1 !important;
+  }
+
+  /* Garante que linhas minimizadas fiquem compactas e horizontais mesmo no mobile */
+  .expense-row.minimized {
+    display: grid !important;
+    grid-template-columns: 1fr 80px !important;
+    grid-template-rows: auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 12px !important;
+  }
+  .expense-row.minimized > .expense-summary-text {
+    grid-row: 1 !important;
+    grid-column: 1 !important;
+  }
+  .expense-row.minimized > .expense-actions-stack {
+    grid-row: 1 !important;
+    grid-column: 2 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
   }
 }
 
