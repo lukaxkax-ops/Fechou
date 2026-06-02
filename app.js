@@ -1151,7 +1151,7 @@ function formatCurrency(value) {
 }
 
 // --- CONTROLE DE DESPESAS DINÂMICAS ---
-function addValeRow(employeeName = "", value = "", containerId = "vales-list-container") {
+function addValeRow(employeeName = "", value = "", category = "folha", containerId = "vales-list-container") {
   const container = document.getElementById(containerId);
   const rowId = `vale-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -1159,11 +1159,19 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
   row.className = "expense-row";
   row.id = rowId;
 
-  // Simétrico ao novo grid CSS de 3 colunas (1fr 120px 42px)
   row.innerHTML = `
     <div class="input-container">
       <label style="font-size: 11px;">Nome do Funcionário</label>
-      <input type="text" class="form-control vale-desc" placeholder="Ex: João (Adiantamento)" value="${employeeName}" required>
+      <input type="text" class="form-control vale-desc" placeholder="Ex: João" value="${employeeName}" required>
+    </div>
+    <div class="input-container">
+      <label style="font-size: 11px;">Categoria</label>
+      <select class="form-control vale-cat" onchange="updateLiveDashboard()" required>
+        <option value="folha" ${category === 'folha' ? 'selected' : ''}>Folha Mensal</option>
+        <option value="extra" ${category === 'extra' ? 'selected' : ''}>Extra</option>
+        <option value="ferias" ${category === 'ferias' ? 'selected' : ''}>Férias</option>
+        <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
+      </select>
     </div>
     <div class="input-container">
       <label style="font-size: 11px;">Valor do Vale</label>
@@ -1177,27 +1185,39 @@ function addValeRow(employeeName = "", value = "", containerId = "vales-list-con
     </button>
   `;
 
-  container.appendChild(row);
+  container.prepend(row);
   lucide.createIcons();
   disableOperatorInputs(isLicenseExpired);
 }
 
-function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "") {
+function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "", observation = "") {
   const container = document.getElementById(containerId);
   const rowId = `expense-row-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   const row = document.createElement("div");
-  row.className = "expense-row";
+  row.className = "expense-row general-expense-row";
   row.id = rowId;
   if (photo) {
     row.dataset.photo = photo;
   }
 
-  // Grade limpa de 3 colunas: Descrição, Valor e Ações
   row.innerHTML = `
     <div class="input-container">
       <label style="font-size: 11px;">Descrição da Despesa</label>
       <input type="text" class="form-control expense-desc" placeholder="Ex: Pão de Hambúrguer" value="${description}" required>
+    </div>
+    <div class="input-container">
+      <label style="font-size: 11px;">Categoria</label>
+      <select class="form-control expense-cat" onchange="updateLiveDashboard()" required>
+        <option value="alimentos" ${category === 'alimentos' ? 'selected' : ''}>Alimentos</option>
+        <option value="limpeza_embalagens" ${category === 'limpeza_embalagens' ? 'selected' : ''}>Limpeza/Embalagens</option>
+        <option value="carne" ${category === 'carne' ? 'selected' : ''}>Carne</option>
+        <option value="outros" ${category === 'outros' ? 'selected' : ''}>Outros</option>
+      </select>
+    </div>
+    <div class="input-container">
+      <label style="font-size: 11px;">Observação</label>
+      <input type="text" class="form-control expense-obs" placeholder="Opcional: Ex: Nota fiscal" value="${observation}">
     </div>
     <div class="input-container">
       <label style="font-size: 11px;">Valor (R$)</label>
@@ -1207,20 +1227,17 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
       </div>
     </div>
     <div class="expense-actions-stack" style="display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; width: 42px; margin-bottom: 0;">
-      <!-- Botão de Foto -->
       <button type="button" class="btn-expense-photo" onclick="triggerExpensePhotoUpload('${rowId}')" title="Anexar Foto da Nota" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
         <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
       </button>
       <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
-      
-      <!-- Botão de Excluir -->
       <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
         <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
       </button>
     </div>
   `;
 
-  container.appendChild(row);
+  container.prepend(row);
   if (photo) {
     updateExpenseRowPhotoUI(rowId, photo);
   }
@@ -2077,12 +2094,14 @@ async function saveClosing(event) {
   valeRows.forEach(row => {
     const employeeName = row.querySelector(".vale-desc").value.trim();
     const val = parseFloat(row.querySelector(".vale-val").value) || 0;
+    const catEl = row.querySelector(".vale-cat");
+    const cat = catEl ? catEl.value : "folha";
 
     if (employeeName && val > 0) {
       expenses.push({
         description: employeeName,
         value: val,
-        category: "vales"
+        category: "vale_" + cat
       });
     }
   });
@@ -2094,13 +2113,16 @@ async function saveClosing(event) {
     const val = parseFloat(row.querySelector(".expense-val").value) || 0;
     const catEl = row.querySelector(".expense-cat");
     const cat = catEl ? catEl.value : "outros";
+    const obsEl = row.querySelector(".expense-obs");
+    const obs = obsEl ? obsEl.value.trim() : "";
 
     if (desc && val > 0) {
       expenses.push({
         description: desc,
         value: val,
-        category: cat,
-        photo: row.dataset.photo || ""
+        category: "despesa_" + cat,
+        photo: row.dataset.photo || "",
+        observation: obs
       });
     }
   });
@@ -2595,11 +2617,13 @@ async function editClosing(dateStr, shiftStr = "dia") {
 
   if (day.expenses.length > 0) {
     day.expenses.forEach(e => {
-      if (e.category === "vales") {
-        addValeRow(e.description, e.value, "edit-vales-list-container");
+      if (e.category === "vales" || e.category.startsWith("vale_")) {
+        const subCat = e.category.startsWith("vale_") ? e.category.split("_")[1] : "folha";
+        addValeRow(e.description, e.value, subCat, "edit-vales-list-container");
         hasVales = true;
       } else {
-        addGeneralExpenseRow(e.description, e.value, e.category, "edit-expense-list-container", e.photo || "");
+        const subCat = e.category.startsWith("despesa_") ? e.category.replace("despesa_", "") : e.category;
+        addGeneralExpenseRow(e.description, e.value, subCat, "edit-expense-list-container", e.photo || "", e.observation || "");
         hasExpenses = true;
       }
     });
@@ -2607,7 +2631,7 @@ async function editClosing(dateStr, shiftStr = "dia") {
 
   // Preenche pelo menos um vazio se não houver registros
   if (!hasVales) {
-    addValeRow("", "", "edit-vales-list-container");
+    addValeRow("", "", "folha", "edit-vales-list-container");
   }
   if (!hasExpenses) {
     addGeneralExpenseRow("", "", "alimentos", "edit-expense-list-container");
@@ -2664,12 +2688,14 @@ async function saveEditClosing(event) {
   valeRows.forEach(row => {
     const employeeName = row.querySelector(".vale-desc").value.trim();
     const val = parseFloat(row.querySelector(".vale-val").value) || 0;
+    const catEl = row.querySelector(".vale-cat");
+    const cat = catEl ? catEl.value : "folha";
 
     if (employeeName && val > 0) {
       expenses.push({
         description: employeeName,
         value: val,
-        category: "vales"
+        category: "vale_" + cat
       });
     }
   });
@@ -2681,13 +2707,16 @@ async function saveEditClosing(event) {
     const val = parseFloat(row.querySelector(".expense-val").value) || 0;
     const catEl = row.querySelector(".expense-cat");
     const cat = catEl ? catEl.value : "outros";
+    const obsEl = row.querySelector(".expense-obs");
+    const obs = obsEl ? obsEl.value.trim() : "";
 
     if (desc && val > 0) {
       expenses.push({
         description: desc,
         value: val,
-        category: cat,
-        photo: row.dataset.photo || ""
+        category: "despesa_" + cat,
+        photo: row.dataset.photo || "",
+        observation: obs
       });
     }
   });
@@ -2924,16 +2953,31 @@ function getFormattedWhatsAppText(day) {
   let expensesTotal = 0;
   
   day.expenses.forEach(e => {
-    if (e.category === "vales") {
+    if (e.category === "vales" || e.category.startsWith("vale_")) {
       valesTotal += e.value;
     } else {
       expensesTotal += e.value;
     }
   });
   
-  const net = revTotal - (expensesTotal + valesTotal);
+  const totalOutflows = expensesTotal + valesTotal;
+  const net = revTotal - totalOutflows;
   const statusStr = net >= 0 ? "🟢 Lucro" : "🔴 Déficit";
   const shiftLabel = (day.shift || "dia") === "noite" ? "🌙 Noite" : "☀️ Dia";
+
+  const VALE_CATEGORIES_LOCAL = {
+    folha: "Folha Mensal",
+    extra: "Extra",
+    ferias: "Férias",
+    outros: "Outros"
+  };
+
+  const EXPENSE_CATEGORIES_LOCAL = {
+    alimentos: "Alimentos",
+    limpeza_embalagens: "Limpeza/Embalagens",
+    carne: "Carne",
+    outros: "Outros"
+  };
 
   // Monta texto formatado do WhatsApp
   let text = `🏪 *FECHOU! - FECHAMENTO DE CAIXA*\n`;
@@ -2960,8 +3004,14 @@ function getFormattedWhatsAppText(day) {
   text += `💸 *SOMA DAS DESPESAS GERAIS: ${formatCurrency(expensesTotal)}*\n`;
   let hasExpenses = false;
   day.expenses.forEach(e => {
-    if (e.category !== "vales") {
-      let expenseText = `  • ${e.description}: ${formatCurrency(e.value)}`;
+    if (e.category !== "vales" && !e.category.startsWith("vale_")) {
+      const rawCat = e.category.startsWith("despesa_") ? e.category.replace("despesa_", "") : e.category;
+      const catLabel = EXPENSE_CATEGORIES_LOCAL[rawCat] || rawCat;
+      let expenseText = `  • [${catLabel}] ${e.description}`;
+      if (e.observation) {
+        expenseText += ` (${e.observation})`;
+      }
+      expenseText += `: ${formatCurrency(e.value)}`;
       if (e.photo) {
         if (e.photo.startsWith("http")) {
           expenseText += ` (📑 Nota: ${e.photo})`;
@@ -2979,14 +3029,20 @@ function getFormattedWhatsAppText(day) {
   text += `👥 *SOMA DE TODOS OS VALES: ${formatCurrency(valesTotal)}*\n`;
   let hasVales = false;
   day.expenses.forEach(e => {
-    if (e.category === "vales") {
-      text += `  • ${e.description}: ${formatCurrency(e.value)}\n`;
+    if (e.category === "vales" || e.category.startsWith("vale_")) {
+      const rawCat = e.category.startsWith("vale_") ? e.category.split("_")[1] : "folha";
+      const catLabel = VALE_CATEGORIES_LOCAL[rawCat] || "Vale";
+      text += `  • [${catLabel}] ${e.description}: ${formatCurrency(e.value)}\n`;
       hasVales = true;
     }
   });
   if (!hasVales) text += `  • Nenhum vale registrado.\n`;
   text += `\n`;
 
+  text += `---------------------------------------\n`;
+  text += `📊 *RESUMO CONSOLIDADO*\n`;
+  text += `💵 *Faturamento Bruto:* ${formatCurrency(revTotal)}\n`;
+  text += `🔻 *Total de Saídas:* ${formatCurrency(totalOutflows)}\n`;
   text += `⚖️ *SALDO LÍQUIDO FINAL: ${formatCurrency(net)}* (${statusStr})\n\n`;
 
   if (day.notes) {

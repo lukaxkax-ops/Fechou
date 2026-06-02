@@ -1509,4 +1509,74 @@ button:disabled {
   }
 }
 
+/* =====================================================================
+   Ajuste de Fontes para a Aba de Fechamento de Caixa
+   ===================================================================== */
+#panel-today label {
+  font-size: 12.5px !important;
+}
+#panel-today .form-control {
+  font-size: 14.5px !important;
+}
+#panel-today .input-prefix {
+  font-size: 13.5px !important;
+}
+#panel-today .sub-section-title {
+  font-size: 16px !important;
+}
+#panel-today .kpi-val {
+  font-size: 23px !important;
+}
+#panel-today .kpi-title {
+  font-size: 12.5px !important;
+}
+
+/* =====================================================================
+   Layout Desktop Customizado para as Linhas de Vales e Despesas
+   ===================================================================== */
+.expense-row {
+  grid-template-columns: 1.5fr 140px 120px 42px !important;
+}
+.expense-row.general-expense-row {
+  grid-template-columns: 1.5fr 140px 1.5fr 120px 42px !important;
+}
+.expense-row.bank-row {
+  grid-template-columns: 1.5fr 120px 140px 42px !important;
+}
+
+@media (max-width: 850px) {
+  /* Empilhamento Flexível no Mobile para evitar quebras em linhas com muitos campos */
+  .expense-row,
+  .expense-row.general-expense-row,
+  .expense-row.bank-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+  .expense-row .input-container,
+  .expense-row.general-expense-row .input-container,
+  .expense-row.bank-row .input-container {
+    width: 100% !important;
+    grid-column: unset !important;
+  }
+  .expense-row button.btn-icon-danger,
+  .expense-row.general-expense-row .expense-actions-stack,
+  .expense-row.bank-row .expense-actions-stack {
+    align-self: flex-end !important;
+    width: auto !important;
+    grid-column: unset !important;
+    flex-direction: row !important;
+    margin-top: 4px !important;
+  }
+  /* Ajusta botões do vale no mobile */
+  .expense-row button.btn-icon-danger {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
 

@@ -1,9 +1,9 @@
 /*
   Service Worker do Fechou! - PWA Cache & Instalabilidade
-  Cache v31 - Compatibilidade total com GitHub Pages /Fechou/
+  Cache v35 - Compatibilidade total com GitHub Pages /Fechou/
 */
 
-const CACHE_NAME = "fechou-cache-v34";
+const CACHE_NAME = "fechou-cache-v35";
 const ASSETS = [
   "/Fechou/",
   "/Fechou/index.html",
