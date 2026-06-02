@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.json?v=2">
   <link rel="apple-touch-icon" href="icon-512.png">
   <link rel="icon" type="image/png" href="icon-512.png">
-  <link rel="stylesheet" href="style.css?v=17.0">
+  <link rel="stylesheet" href="style.css?v=18.0">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -292,6 +292,7 @@
                     <select id="closing-shift" class="form-control" required>
                       <option value="dia" selected>☀️ Dia</option>
                       <option value="noite">🌙 Noite</option>
+                      <option value="madrugada">🌌 Madrugada</option>
                     </select>
                   </div>
                 </div>
@@ -478,9 +479,10 @@
                 <div class="input-container" style="min-width: 120px;">
                   <label for="filter-shift">Turno:</label>
                   <select id="filter-shift" class="form-control" onchange="loadHistoryTable()">
-                    <option value="all">☀️🌙 Todos</option>
+                    <option value="all">☀️🌙🌌 Todos</option>
                     <option value="dia">☀️ Dia</option>
                     <option value="noite">🌙 Noite</option>
+                    <option value="madrugada">🌌 Madrugada</option>
                   </select>
                 </div>
                 <div class="input-container" style="min-width: 160px;">
@@ -933,6 +935,7 @@
                     <select id="bank-closing-shift" class="form-control" required>
                       <option value="dia">☀️ Dia</option>
                       <option value="noite">🌙 Noite</option>
+                      <option value="madrugada">🌌 Madrugada</option>
                     </select>
                   </div>
                 </div>
@@ -1308,6 +1311,7 @@
               <select id="edit-closing-shift" class="form-control" required>
                 <option value="dia">☀️ Dia</option>
                 <option value="noite">🌙 Noite</option>
+                <option value="madrugada">🌌 Madrugada</option>
               </select>
             </div>
           </div>
@@ -1377,6 +1381,7 @@
               <select id="edit-bank-closing-shift" class="form-control" required>
                 <option value="dia">☀️ Dia</option>
                 <option value="noite">🌙 Noite</option>
+                <option value="madrugada">🌌 Madrugada</option>
               </select>
             </div>
           </div>
@@ -1518,6 +1523,6 @@
   </div>
 
   <!-- JS App Principal -->
-  <script src="app.js?v=23.0"></script>
+  <script src="app.js?v=24.0"></script>
 </body>
 </html>

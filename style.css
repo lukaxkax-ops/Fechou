@@ -806,6 +806,14 @@ header {
   background: rgba(244, 63, 94, 0.12);
   color: var(--color-expense);
 }
+.badge-madrugada {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+}
+body.dark-theme .badge-madrugada {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c084fc;
+}
 
 /* Estilo da Seção de Configuração */
 .settings-grid {

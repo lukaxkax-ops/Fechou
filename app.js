@@ -2135,7 +2135,7 @@ async function saveClosing(event) {
   // Verifica se já existe um fechamento para esta data E turno com exigência de Senha Admin
   const dateExists = closingsData.findIndex(c => c.date === dateInput && (c.shift || "dia") === shiftInput);
   if (dateExists !== -1) {
-    const shiftLabel = shiftInput === "dia" ? "Dia" : "Noite";
+    const shiftLabel = shiftInput === "madrugada" ? "Madrugada" : (shiftInput === "noite" ? "Noite" : "Dia");
     const inputPass = prompt(`⚠️ Já existe um fechamento salvo para o dia ${formatDate(dateInput)} no turno ${shiftLabel}. Para substituir e sobrepor os dados, insira a Senha Administrativa:`);
     if (inputPass === null) return; // cancelou
     
@@ -2396,8 +2396,8 @@ function loadHistoryTable() {
     tr.innerHTML = `
       <td class="bold">
         ${formatDate(day.date)}
-        <span class="badge ${day.shift === 'noite' ? 'badge-expense' : 'badge-revenue'}" style="font-size: 10px; padding: 2px 6px; margin-left: 6px; vertical-align: middle;">
-          ${day.shift === 'noite' ? '🌙 Noite' : '☀️ Dia'}
+        <span class="badge ${day.shift === 'madrugada' ? 'badge-madrugada' : (day.shift === 'noite' ? 'badge-expense' : 'badge-revenue')}" style="font-size: 10px; padding: 2px 6px; margin-left: 6px; vertical-align: middle;">
+          ${day.shift === 'madrugada' ? '🌌 Madrugada' : (day.shift === 'noite' ? '🌙 Noite' : '☀️ Dia')}
         </span>
       </td>
       <td class="text-revenue">${formatCurrency(revTotal)}</td>
@@ -2438,7 +2438,7 @@ function viewDetails(dateStr, shiftStr = "dia") {
   currentViewDate = dateStr;
   currentViewShift = shiftStr;
   
-  const shiftLabel = shiftStr === "noite" ? "🌙 Noite" : "☀️ Dia";
+  const shiftLabel = shiftStr === "madrugada" ? "🌌 Madrugada" : (shiftStr === "noite" ? "🌙 Noite" : "☀️ Dia");
   document.getElementById("modal-details-title").textContent = `Detalhamento de Caixa — ${formatDate(day.date)} [${shiftLabel}]`;
 
   let revTotal = 0;
@@ -2549,7 +2549,7 @@ async function deleteClosing(dateStr, shiftStr = "dia") {
     return;
   }
 
-  const shiftLabel = shiftStr === "noite" ? "Noite" : "Dia";
+  const shiftLabel = shiftStr === "madrugada" ? "Madrugada" : (shiftStr === "noite" ? "Noite" : "Dia");
   const inputPass = prompt(`Digite a Senha Administrativa para autorizar a EXCLUSÃO do fechamento do dia ${formatDate(dateStr)} (${shiftLabel}):`);
   if (inputPass === null) return; // cancelou
 
@@ -2590,7 +2590,7 @@ async function editClosing(dateStr, shiftStr = "dia") {
   const day = closingsData.find(c => c.date === dateStr && (c.shift || "dia") === shiftStr);
   if (!day) return;
 
-  const shiftLabel = shiftStr === "noite" ? "Noite" : "Dia";
+  const shiftLabel = shiftStr === "madrugada" ? "Madrugada" : (shiftStr === "noite" ? "Noite" : "Dia");
   const inputPass = prompt(`Digite a Senha Administrativa para autorizar a EDIÇÃO do fechamento do dia ${formatDate(dateStr)} (${shiftLabel}):`);
   if (inputPass === null) return; // cancelou
 
@@ -2752,7 +2752,7 @@ async function saveEditClosing(event) {
   if (targetShift !== originalShift) {
     const shiftExists = closingsData.some(c => c.date === originalDate && (c.shift || "dia") === targetShift);
     if (shiftExists) {
-      const targetShiftLabel = targetShift === "noite" ? "Noite" : "Dia";
+      const targetShiftLabel = targetShift === "madrugada" ? "Madrugada" : (targetShift === "noite" ? "Noite" : "Dia");
       alert(`Já existe um fechamento cadastrado para o dia ${formatDate(originalDate)} no turno ${targetShiftLabel}. Não é possível alterar.`);
       return;
     }
@@ -3054,7 +3054,7 @@ function getFormattedWhatsAppText(day) {
   const totalOutflows = expensesTotal + valesTotal;
   const net = revTotal - totalOutflows;
   const statusStr = net >= 0 ? "🟢 Lucro" : "🔴 Déficit";
-  const shiftLabel = (day.shift || "dia") === "noite" ? "🌙 Noite" : "☀️ Dia";
+  const shiftLabel = (day.shift || "dia") === "madrugada" ? "🌌 Madrugada" : ((day.shift || "dia") === "noite" ? "🌙 Noite" : "☀️ Dia");
 
   const VALE_CATEGORIES_LOCAL = {
     folha: "Folha Mensal",
@@ -3987,7 +3987,7 @@ async function saveBankClosing(event) {
 
   const existsIndex = bankClosingsData.findIndex(c => c.date === dateInput && (c.shift || "dia") === shiftInput);
   if (existsIndex !== -1) {
-    const shiftLabel = shiftInput === "dia" ? "Dia" : "Noite";
+    const shiftLabel = shiftInput === "madrugada" ? "Madrugada" : (shiftInput === "noite" ? "Noite" : "Dia");
     const inputPass = prompt(`⚠️ Já existe um fechamento bancário cadastrado para o dia ${formatDate(dateInput)} no turno ${shiftLabel}. Para substituir e sobrepor os dados, insira a Senha Administrativa:`);
     if (inputPass === null) return; // cancelou
     
@@ -4134,8 +4134,8 @@ function loadBankHistoryTable() {
     tr.innerHTML = `
       <td class="bold">
         ${formatDate(day.date)}
-        <span class="badge ${day.shift === 'noite' ? 'badge-expense' : 'badge-revenue'}" style="font-size: 10px; padding: 2px 6px; margin-left: 6px; vertical-align: middle;">
-          ${day.shift === 'noite' ? '🌙 Noite' : '☀️ Dia'}
+        <span class="badge ${day.shift === 'madrugada' ? 'badge-madrugada' : (day.shift === 'noite' ? 'badge-expense' : 'badge-revenue')}" style="font-size: 10px; padding: 2px 6px; margin-left: 6px; vertical-align: middle;">
+          ${day.shift === 'madrugada' ? '🌌 Madrugada' : (day.shift === 'noite' ? '🌙 Noite' : '☀️ Dia')}
         </span>
       </td>
       <td class="text-revenue" style="text-align: right;">${formatCurrency(totalInflows)}</td>
@@ -4166,7 +4166,7 @@ function loadBankHistoryTable() {
       card.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <strong style="color: #fff;">${formatDate(day.date)}</strong>
-          <span class="badge ${day.shift === 'noite' ? 'badge-expense' : 'badge-revenue'}">${day.shift === 'noite' ? '🌙 Noite' : '☀️ Dia'}</span>
+          <span class="badge ${day.shift === 'madrugada' ? 'badge-madrugada' : (day.shift === 'noite' ? 'badge-expense' : 'badge-revenue')}">${day.shift === 'madrugada' ? '🌌 Madrugada' : (day.shift === 'noite' ? '🌙 Noite' : '☀️ Dia')}</span>
         </div>
         <div style="font-size: 13px; color: var(--text-secondary);">Operador: ${day.operatorName}</div>
         <div style="display: flex; justify-content: space-between; font-size: 13px;">
@@ -4214,7 +4214,7 @@ function getFormattedBankWhatsAppText(day) {
 
   const net = totalInflows - totalOutflows;
   const statusStr = net >= 0 ? "🟢 Saldo Positivo" : "🔴 Saldo Negativo";
-  const shiftLabel = (day.shift || "dia") === "noite" ? "🌙 Noite" : "☀️ Dia";
+  const shiftLabel = (day.shift || "dia") === "madrugada" ? "🌌 Madrugada" : ((day.shift || "dia") === "noite" ? "🌙 Noite" : "☀️ Dia");
 
   const activeStoreName = localStorage.getItem(`gastrofecho_store_name_${currentUser}`) || day.storeName || "Não informada";
 
@@ -4296,7 +4296,7 @@ function viewBankDetails(dateStr, shiftStr = "dia") {
   currentViewBankDate = dateStr;
   currentViewBankShift = shiftStr;
 
-  const shiftLabel = shiftStr === "noite" ? "🌙 Noite" : "☀️ Dia";
+  const shiftLabel = shiftStr === "madrugada" ? "🌌 Madrugada" : (shiftStr === "noite" ? "🌙 Noite" : "☀️ Dia");
   document.getElementById("modal-bank-details-title").textContent = `Detalhamento Bancário — ${formatDate(day.date)} [${shiftLabel}]`;
 
   let totalInflows = 0;
@@ -4385,7 +4385,7 @@ async function deleteBankClosing(dateStr, shiftStr = "dia") {
     return;
   }
 
-  const shiftLabel = shiftStr === "noite" ? "Noite" : "Dia";
+  const shiftLabel = shiftStr === "madrugada" ? "Madrugada" : (shiftStr === "noite" ? "Noite" : "Dia");
   const inputPass = prompt(`Digite a Senha Administrativa para autorizar a EXCLUSÃO do fechamento bancário do dia ${formatDate(dateStr)} (${shiftLabel}):`);
   if (inputPass === null) return;
 
@@ -4423,7 +4423,7 @@ async function editBankClosing(dateStr, shiftStr = "dia") {
   const day = bankClosingsData.find(c => c.date === dateStr && (c.shift || "dia") === shiftStr);
   if (!day) return;
 
-  const shiftLabel = shiftStr === "noite" ? "Noite" : "Dia";
+  const shiftLabel = shiftStr === "madrugada" ? "Madrugada" : (shiftStr === "noite" ? "Noite" : "Dia");
   const inputPass = prompt(`Digite a Senha Administrativa para autorizar a EDIÇÃO do fechamento bancário do dia ${formatDate(dateStr)} (${shiftLabel}):`);
   if (inputPass === null) return;
 
@@ -4503,7 +4503,7 @@ async function saveEditBankClosing(event) {
   if (targetShift !== originalShift) {
     const shiftExists = bankClosingsData.some(c => c.date === originalDate && (c.shift || "dia") === targetShift);
     if (shiftExists) {
-      const targetShiftLabel = targetShift === "noite" ? "Noite" : "Dia";
+      const targetShiftLabel = targetShift === "madrugada" ? "Madrugada" : (targetShift === "noite" ? "Noite" : "Dia");
       alert(`Já existe um fechamento bancário cadastrado para o dia ${formatDate(originalDate)} no turno ${targetShiftLabel}. Não é possível alterar.`);
       return;
     }
@@ -5042,8 +5042,8 @@ function viewEmployeeValesDetails(employeeKey) {
     tr.innerHTML = `
       <td style="padding: 10px 8px;">${formatDate(item.date)}</td>
       <td style="padding: 10px 8px;">
-        <span class="badge ${item.shift === 'noite' ? 'badge-expense' : 'badge-revenue'}" style="font-size: 10px; padding: 2px 6px;">
-          ${item.shift === 'noite' ? '🌙 Noite' : '☀️ Dia'}
+        <span class="badge ${item.shift === 'madrugada' ? 'badge-madrugada' : (item.shift === 'noite' ? 'badge-expense' : 'badge-revenue')}" style="font-size: 10px; padding: 2px 6px;">
+          ${item.shift === 'madrugada' ? '🌌 Madrugada' : (item.shift === 'noite' ? '🌙 Noite' : '☀️ Dia')}
         </span>
       </td>
       <td style="padding: 10px 8px; color: var(--text-secondary);">${item.description}</td>
@@ -5065,7 +5065,7 @@ function getFormattedEmployeeValesText(emp, startDate, endDate) {
 
   emp.items.forEach(item => {
     const dateStr = formatDate(item.date);
-    const shiftLabel = item.shift === "noite" ? "🌙 Noite" : "☀️ Dia";
+    const shiftLabel = item.shift === "madrugada" ? "🌌 Madrugada" : (item.shift === "noite" ? "🌙 Noite" : "☀️ Dia");
     text += `📅 *${dateStr}* (${shiftLabel})\n`;
     text += `   💰 *Valor:* ${formatCurrency(item.value)}\n\n`;
   });
