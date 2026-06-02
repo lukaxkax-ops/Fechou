@@ -1547,10 +1547,10 @@ button:disabled {
    Layout Desktop Customizado para as Linhas de Vales e Despesas
    ===================================================================== */
 .expense-row {
-  grid-template-columns: 1.5fr 140px 120px 80px !important;
+  grid-template-columns: 1.5fr 140px 120px 100px !important;
 }
 .expense-row.general-expense-row {
-  grid-template-columns: 1.5fr 140px 1.5fr 120px 110px !important;
+  grid-template-columns: 1.5fr 140px 1.5fr 120px 140px !important;
 }
 .expense-row.bank-row {
   grid-template-columns: 1.5fr 120px 140px 80px !important;

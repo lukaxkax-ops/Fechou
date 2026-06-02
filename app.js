@@ -1206,8 +1206,8 @@ function addValeRow(employeeName = "", value = "", category = "folha", container
       </div>
     </div>
     <div class="expense-actions-stack" style="margin-bottom: 0;">
-      <button type="button" class="btn-expense-ok" onclick="toggleRowMinimize('${rowId}', 'vale')" title="Confirmar Lançamento (Minimizar)" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
-        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+      <button type="button" class="btn-expense-ok" onclick="toggleRowMinimize('${rowId}', 'vale')" title="Confirmar Lançamento (Minimizar)" style="padding: 0 10px; height: 38px; display: flex; align-items: center; gap: 4px; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; font-weight: 700; font-size: 12px; transition: var(--transition-smooth);">
+        <i data-lucide="check" style="width: 14px; height: 14px;"></i> OK
       </button>
       <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir vale" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
         <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
@@ -1291,8 +1291,8 @@ function addGeneralExpenseRow(description = "", value = "", category = "alimento
         <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
       </button>
       <input type="file" id="file-${rowId}" accept="image/*" style="display: none;" onchange="handleExpensePhoto(this, '${rowId}')">
-      <button type="button" class="btn-expense-ok" onclick="toggleRowMinimize('${rowId}', 'expense')" title="Confirmar Lançamento (Minimizar)" style="width: 38px; height: 38px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; transition: var(--transition-smooth);">
-        <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+      <button type="button" class="btn-expense-ok" onclick="toggleRowMinimize('${rowId}', 'expense')" title="Confirmar Lançamento (Minimizar)" style="padding: 0 10px; height: 38px; display: flex; align-items: center; gap: 4px; border-radius: 8px; border: 1px solid var(--border-glass); background: rgba(255, 255, 255, 0.05); color: var(--text-main); cursor: pointer; font-weight: 700; font-size: 12px; transition: var(--transition-smooth);">
+        <i data-lucide="check" style="width: 14px; height: 14px;"></i> OK
       </button>
       <button type="button" class="btn-icon-danger" onclick="removeExpenseRow('${rowId}')" title="Excluir despesa" style="width: 38px; height: 38px; margin: 0; display: flex; align-items: center; justify-content: center;">
         <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
@@ -1325,7 +1325,7 @@ function toggleRowMinimize(rowId, type) {
   if (isMinimized) {
     // Expandir
     row.classList.remove("minimized");
-    toggleBtn.innerHTML = `<i data-lucide="check" style="width: 16px; height: 16px;"></i>`;
+    toggleBtn.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px;"></i> OK`;
     toggleBtn.title = "Confirmar Lançamento (Minimizar)";
     toggleBtn.style.background = "rgba(255, 255, 255, 0.05)";
     toggleBtn.style.color = "var(--text-main)";

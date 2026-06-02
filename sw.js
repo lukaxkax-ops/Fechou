@@ -3,7 +3,7 @@
   Cache v35 - Compatibilidade total com GitHub Pages /Fechou/
 */
 
-const CACHE_NAME = "fechou-cache-v41";
+const CACHE_NAME = "fechou-cache-v42";
 const ASSETS = [
   "/Fechou/",
   "/Fechou/index.html",
