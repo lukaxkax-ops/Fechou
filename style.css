@@ -1239,7 +1239,8 @@ header {
   }
   
   .input-container label {
-    font-size: 11px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
   }
   
   .form-control {
@@ -1512,8 +1513,11 @@ button:disabled {
 /* =====================================================================
    Ajuste de Fontes para a Aba de Fechamento de Caixa
    ===================================================================== */
-#panel-today label {
-  font-size: 12.5px !important;
+#panel-today label,
+.modal-body label {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
 }
 #panel-today .form-control {
   font-size: 14.5px !important;
@@ -1883,6 +1887,8 @@ body.dark-theme .form-section-card:hover {
   .revenue-group .input-container label {
     margin-bottom: 0 !important;
     font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--text-main) !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
