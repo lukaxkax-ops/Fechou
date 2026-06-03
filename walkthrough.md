@@ -40,9 +40,9 @@ Criamos uma nova classe de badge específica para o turno Madrugada em [style.cs
 
 ### 7. Controle de Cache e Versionamento (Cache-Busting)
 * Incrementada a versão das tags de importação de script/CSS no `index.html` para:
-  * `app.js?v=28.0`
+  * `app.js?v=29.0`
   * `style.css?v=20.0`
-* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/sw.js) foi atualizado para utilizar o cache `"fechou-cache-v45"`.
+* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/sw.js) foi atualizado para utilizar o cache `"fechou-cache-v46"`.
 
 ---
 
