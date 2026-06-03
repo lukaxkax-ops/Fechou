@@ -1154,26 +1154,15 @@ function formatCurrency(value) {
 function addValeRow(employeeName = "", value = "", category = "folha", containerId = "vales-list-container", isInitial = false) {
   const container = document.getElementById(containerId);
   
-  // Validação: não permitir adicionar manualmente se já houver algum vale ou despesa não confirmado no mesmo escopo
+  // Validação: não permitir adicionar manualmente se já houver algum vale não confirmado neste contêiner
   if (!isInitial && !employeeName && !value) {
-    const scopeContainerIds = containerId.startsWith("edit-") 
-      ? ["edit-vales-list-container", "edit-expense-list-container"] 
-      : ["vales-list-container", "expense-list-container"];
-
-    let hasActiveUnconfirmed = false;
-    scopeContainerIds.forEach(id => {
-      const parent = document.getElementById(id);
-      if (parent) {
-        const rows = parent.querySelectorAll(".expense-row:not(.minimized)");
-        if (rows.length > 0) {
-          hasActiveUnconfirmed = true;
-        }
+    const parent = document.getElementById(containerId);
+    if (parent) {
+      const rows = parent.querySelectorAll(".expense-row:not(.minimized)");
+      if (rows.length > 0) {
+        alert("⚠️ Por favor, confirme (clicando no botão 'OK') o vale atual antes de adicionar um novo.");
+        return;
       }
-    });
-
-    if (hasActiveUnconfirmed) {
-      alert("⚠️ Por favor, confirme (clicando no botão 'OK') a despesa ou vale atual antes de adicionar um novo.");
-      return;
     }
   }
 
@@ -1228,26 +1217,15 @@ function addValeRow(employeeName = "", value = "", category = "folha", container
 function addGeneralExpenseRow(description = "", value = "", category = "alimentos", containerId = "expense-list-container", photo = "", observation = "", isInitial = false) {
   const container = document.getElementById(containerId);
   
-  // Validação: não permitir adicionar manualmente se já houver algum vale ou despesa não confirmado no mesmo escopo
+  // Validação: não permitir adicionar manualmente se já houver alguma despesa não confirmada neste contêiner
   if (!isInitial && !description && !value) {
-    const scopeContainerIds = containerId.startsWith("edit-") 
-      ? ["edit-vales-list-container", "edit-expense-list-container"] 
-      : ["vales-list-container", "expense-list-container"];
-
-    let hasActiveUnconfirmed = false;
-    scopeContainerIds.forEach(id => {
-      const parent = document.getElementById(id);
-      if (parent) {
-        const rows = parent.querySelectorAll(".expense-row:not(.minimized)");
-        if (rows.length > 0) {
-          hasActiveUnconfirmed = true;
-        }
+    const parent = document.getElementById(containerId);
+    if (parent) {
+      const rows = parent.querySelectorAll(".expense-row:not(.minimized)");
+      if (rows.length > 0) {
+        alert("⚠️ Por favor, confirme (clicando no botão 'OK') a despesa atual antes de adicionar uma nova.");
+        return;
       }
-    });
-
-    if (hasActiveUnconfirmed) {
-      alert("⚠️ Por favor, confirme (clicando no botão 'OK') a despesa ou vale atual antes de adicionar um novo.");
-      return;
     }
   }
 
