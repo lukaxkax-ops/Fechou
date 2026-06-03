@@ -3087,8 +3087,7 @@ function getFormattedWhatsAppText(day) {
     }
   });
   
-  const appsTotal = (day.revenues.ifood || 0) + (day.revenues['99'] || 0) + (day.revenues.keeta || 0);
-  const faturamentoBruto = appsTotal + expensesTotal + valesTotal;
+  const faturamentoBruto = revTotal + expensesTotal + valesTotal;
   const totalSaidas = expensesTotal + valesTotal;
   const net = faturamentoBruto - totalSaidas;
   const statusStr = net >= 0 ? "🟢 Lucro" : "🔴 Déficit";
