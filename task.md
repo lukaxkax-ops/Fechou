@@ -32,9 +32,10 @@
 - [x] **Ajuste de Escopo da Validação (Vales vs Despesas)**
   - [x] Restringir a verificação de linhas não confirmadas para o contêiner específico onde o item está sendo adicionado
   - [x] Evitar que o primeiro campo de despesa em branco (unminimized) bloqueie a adição de novos vales, e vice-versa
+- [x] Ajustar cálculo do WhatsApp: faturamento bruto = apps + despesas + vales, total de saídas = despesas + vales, saldo líquido = bruto - saídas.
 - [x] Controle de cache e versionamento (Cache-Busting)
-  - [x] Incrementar versão do script (`app.js?v=29.0`) e estilo (`style.css?v=20.0`) em `index.html`
-  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v46`
+  - [x] Incrementar versão do script (`app.js?v=30.0`) e estilo (`style.css?v=20.0`) em `index.html`
+  - [x] Atualizar versão do Service Worker (`sw.js`) para `fechou-cache-v47`
 - [/] Deployment e Sincronização
   - [/] Copiar novos arquivos para o repositório de produção `fechou-deploy`
   - [ ] Stager, commiter e dar push nos dois repositórios (dev e prod)

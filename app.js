@@ -3087,8 +3087,10 @@ function getFormattedWhatsAppText(day) {
     }
   });
   
-  const totalOutflows = expensesTotal + valesTotal;
-  const net = revTotal - totalOutflows;
+  const appsTotal = (day.revenues.ifood || 0) + (day.revenues['99'] || 0) + (day.revenues.keeta || 0);
+  const faturamentoBruto = appsTotal + expensesTotal + valesTotal;
+  const totalSaidas = expensesTotal + valesTotal;
+  const net = faturamentoBruto - totalSaidas;
   const statusStr = net >= 0 ? "🟢 Lucro" : "🔴 Déficit";
   const shiftLabel = (day.shift || "dia") === "madrugada" ? "🌌 Madrugada" : ((day.shift || "dia") === "noite" ? "🌙 Noite" : "☀️ Dia");
 
@@ -3168,8 +3170,8 @@ function getFormattedWhatsAppText(day) {
 
   text += `---------------------------------------\n`;
   text += `📊 *RESUMO CONSOLIDADO*\n`;
-  text += `💵 *Faturamento Bruto:* ${formatCurrency(revTotal)}\n`;
-  text += `🔻 *Total de Saídas:* ${formatCurrency(totalOutflows)}\n`;
+  text += `💵 *Faturamento Bruto:* ${formatCurrency(faturamentoBruto)}\n`;
+  text += `🔻 *Total de Saídas:* ${formatCurrency(totalSaidas)}\n`;
   text += `⚖️ *SALDO LÍQUIDO FINAL: ${formatCurrency(net)}* (${statusStr})\n\n`;
 
   if (day.notes) {

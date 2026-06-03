@@ -40,9 +40,14 @@ Criamos uma nova classe de badge específica para o turno Madrugada em [style.cs
 
 ### 7. Controle de Cache e Versionamento (Cache-Busting)
 * Incrementada a versão das tags de importação de script/CSS no `index.html` para:
-  * `app.js?v=29.0`
+  * `app.js?v=30.0`
   * `style.css?v=20.0`
-* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini/antigravity/scratch/fechamento-lanchonete/sw.js) foi atualizado para utilizar o cache `"fechou-cache-v46"`.
+* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini\antigravity\scratch\fechamento-lanchonete\sw.js) foi atualizado para utilizar o cache `"fechou-cache-v47"`.
+
+### 8. Fórmulas de Fechamento Customizadas no WhatsApp
+* **Faturamento Bruto:** Alterado no resumo do WhatsApp para calcular a soma de **Entradas de Apps (iFood, 99 Food, Keeta) + Despesas Gerais + Vales**.
+* **Total de Saídas:** Mantém-se como a soma de **Despesas Gerais + Vales**.
+* **Saldo Líquido:** Calculado como **Faturamento Bruto - Total de Saídas** (o que resulta no montante total das entradas via apps).
 
 ---
 
