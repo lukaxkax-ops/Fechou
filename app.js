@@ -1,12 +1,12 @@
 // =====================================================================
 // Banco de Dados em Nuvem - Upstash Redis REST API
 // CORS nativo comprovado no browser, dados via body JSON, sem limite de URL.
-// UUID fixo: 772e0cd0-932d-4692-8cc8-77d8180dfa48
-// Para renovar/recriar: POST https://upstash.com/start-redis com Idempotency-Key: 772e0cd0-932d-4692-8cc8-77d8180dfa48
-// Para tornar permanente: https://upstash.com/start-redis/console/772e0cd0-932d-4692-8cc8-77d8180dfa48
+// UUID de provisionamento: 93387829-bee2-4aed-81ac-3fb4d5fd0579
+// Para renovar/recriar: POST https://upstash.com/start-redis com Idempotency-Key: 93387829-bee2-4aed-81ac-3fb4d5fd0579
+// Para tornar permanente (Reivindicar): https://upstash.com/start-redis/console/93387829-bee2-4aed-81ac-3fb4d5fd0579
 // =====================================================================
-const UPSTASH_URL = "https://valid-rooster-88690.upstash.io";
-const UPSTASH_TOKEN = "gQAAAAAAAVpyAQIgcDEzN2FjY2JlMDFiMDI0ZGY1ODA3MzlmMjFhYTVlZGJiYQ";
+const UPSTASH_URL = "https://cuddly-lemming-150558.upstash.io";
+const UPSTASH_TOKEN = "gQAAAAAAAkweAQIgcDI3YmI4Njc5NjNiY2Y0MGY3ODc4YjcxZDc2MzMwZTZlYQ";
 
 // Chave Pix do Administrador Mestre para Recebimento de Créditos (Configurável)
 const PIX_KEY = "70df014b-dec7-412a-9920-743e2687e3fb";

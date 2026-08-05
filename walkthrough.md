@@ -40,14 +40,19 @@ Criamos uma nova classe de badge específica para o turno Madrugada em [style.cs
 
 ### 7. Controle de Cache e Versionamento (Cache-Busting)
 * Incrementada a versão das tags de importação de script/CSS no `index.html` para:
-  * `app.js?v=31.0`
+  * `app.js?v=32.0`
   * `style.css?v=20.0`
-* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini\antigravity\scratch\fechamento-lanchonete\sw.js) foi atualizado para utilizar o cache `"fechou-cache-v48"`.
+* O Service Worker em [sw.js](file:///C:/Users/Lucão/.gemini\antigravity\scratch\fechamento-lanchonete\sw.js) foi atualizado para utilizar o cache `"fechou-cache-v49"`.
 
 ### 8. Fórmulas de Fechamento Customizadas no WhatsApp
 * **Faturamento Bruto:** Alterado no resumo do WhatsApp para calcular a soma de **Total de Receitas (dinheiro, cartões, Pix, etc.) + Despesas Gerais + Vales**.
 * **Total de Saídas:** Mantém-se como a soma de **Despesas Gerais + Vales**.
 * **Saldo Líquido:** Calculado como **Faturamento Bruto - Total de Saídas** (o que resulta no montante total das receitas originais digitadas).
+
+### 9. Restauração do Banco de Dados em Nuvem (Upstash Redis)
+* **Causa:** O banco de dados Upstash anterior expirou ou foi excluído por inatividade (após 30 dias sem uso), fazendo com que as operações na nuvem falhassem com erro de conexão.
+* **Ação:** Provisionamos uma nova base de dados no Upstash (`cuddly-lemming-150558.upstash.io`) e configuramos a nova URL e token correspondentes no `app.js`.
+* **Permanência:** Fornecemos o link do console do Upstash para o Administrador Mestre reivindicar a posse do banco de dados na nuvem para torná-lo permanente.
 
 ---
 
